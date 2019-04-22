@@ -1,11 +1,9 @@
-package com.github.liebharc.queryenricher;
+package com.github.liebharc.queryenrichment;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
-
-import static org.junit.Assert.*;
 
 public class SchemaDocumentationTest {
 

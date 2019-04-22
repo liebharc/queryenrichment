@@ -1,7 +1,6 @@
-package com.github.liebharc.queryenricher;
+package com.github.liebharc.queryenrichment;
 
 import java.util.List;
-import java.util.Map;
 
 public class QueryResult {
     private final List<List<Object>> rows;

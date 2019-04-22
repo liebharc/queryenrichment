@@ -1,4 +1,4 @@
-package com.github.liebharc.queryenricher;
+package com.github.liebharc.queryenrichment;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,7 +40,7 @@ public class H2QueryBuilder implements QueryBuilder{
     }
 
     @Override
-    public com.github.liebharc.queryenricher.Query build(List<Selector> selectors, String domain, List<SimpleExpression> filters) {
+    public com.github.liebharc.queryenrichment.Query build(List<Selector> selectors, String domain, List<SimpleExpression> filters) {
         if (selectors.isEmpty()) {
             throw  new IllegalArgumentException("At least one attribute must be selected");
         }
@@ -69,7 +69,7 @@ public class H2QueryBuilder implements QueryBuilder{
         return new Query(query.toString(), selectors);
     }
 
-    private class Query implements com.github.liebharc.queryenricher.Query {
+    private class Query implements com.github.liebharc.queryenrichment.Query {
 
         private final String query;
         private final List<Selector> selectors;

@@ -1,4 +1,4 @@
-package com.github.liebharc.queryenricher;
+package com.github.liebharc.queryenrichment;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;

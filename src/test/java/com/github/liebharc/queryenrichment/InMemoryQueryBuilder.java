@@ -1,8 +1,7 @@
-package com.github.liebharc.queryenricher;
+package com.github.liebharc.queryenrichment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class InMemoryQueryBuilder implements QueryBuilder {
@@ -20,7 +19,7 @@ public class InMemoryQueryBuilder implements QueryBuilder {
     }
 
     @Override
-    public com.github.liebharc.queryenricher.Query build(List<Selector> selectors, String domain, List<SimpleExpression> filters) {
+    public com.github.liebharc.queryenrichment.Query build(List<Selector> selectors, String domain, List<SimpleExpression> filters) {
         if (!filters.isEmpty()) {
             throw new IllegalArgumentException("This class doesn't support criteria");
         }
@@ -48,7 +47,7 @@ public class InMemoryQueryBuilder implements QueryBuilder {
         }
     }
 
-    public class Query implements com.github.liebharc.queryenricher.Query {
+    public class Query implements com.github.liebharc.queryenrichment.Query {
 
         private final List<Selector> selectors;
 

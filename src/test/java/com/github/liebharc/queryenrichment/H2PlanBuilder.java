@@ -1,8 +1,7 @@
-package com.github.liebharc.queryenricher;
+package com.github.liebharc.queryenrichment;
 
 import java.sql.Statement;
 import java.util.List;
-import java.util.Map;
 
 public class H2PlanBuilder extends PlanBuilder {
 
