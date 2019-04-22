@@ -30,7 +30,7 @@ public class TopologicalSort {
         else {
             visited.add(item);
 
-            List<Attribute> dependencies = item.getDependencies();
+            List<Attribute<?>> dependencies = item.getDependencies();
             for (Attribute dependency : dependencies) {
                 Selector selectorDependency = attributeToSelector.get(dependency);
                 if (selectorDependency == null) {

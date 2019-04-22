@@ -8,10 +8,10 @@ public class Selector {
 
     public static final String NO_COLUMN = null;
 
-    private final Attribute attributes;
+    private final Attribute<?> attributes;
     private final String column;
 
-    public Selector(Attribute attribute, String columnOrNull) {
+    public Selector(Attribute<?> attribute, String columnOrNull) {
         this.attributes = attribute;
         this.column = columnOrNull;
     }
@@ -20,7 +20,7 @@ public class Selector {
         return Optional.ofNullable(column);
     }
 
-    public Attribute getAttribute() {
+    public Attribute<?> getAttribute() {
         return attributes;
     }
 
@@ -28,7 +28,7 @@ public class Selector {
         result.addFromQuery(this);
     }
 
-    public List<Attribute> getDependencies() {
+    public List<Attribute<?>> getDependencies() {
         return Collections.emptyList();
     }
 

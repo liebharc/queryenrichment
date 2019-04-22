@@ -1,10 +1,7 @@
 package com.github.liebharc.queryenrichment;
 
 import org.h2.jdbcx.JdbcDataSource;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -24,16 +21,10 @@ public class LoadIndicationTest {
     private JdbcDataSource dataSource;
     private JdbcTemplate jdbcTemplate;
 
-    public static final Selector studentId = new SelectorBuilder().addAttribute("student", "id").addColumn("ID").build();
-    public static final Selector firstName = new SelectorBuilder().addAttribute("student", "firstName").addColumn("firstName").build();
-    public static final Selector lastName = new SelectorBuilder().addAttribute("student", "lastName").addColumn("lastName").build();
-    public static final Selector classId = new SelectorBuilder().addAttribute("student", "class").addColumn("classId").build();
-
-    public static final Attribute studentIdAttr = studentId.getAttribute();
-    public static final Attribute firstNameAttr = firstName.getAttribute();
-    public static final Attribute lastNameAttr = lastName.getAttribute();
-    public static final Attribute classIdAttr = classId.getAttribute();
-
+    public static final Selector studentId = new SelectorBuilder().addAttribute(Attributes.studentId).addColumn("ID").build();
+    public static final Selector firstName = new SelectorBuilder().addAttribute(Attributes.firstName).addColumn("firstName").build();
+    public static final Selector lastName = new SelectorBuilder().addAttribute(Attributes.lastName).addColumn("lastName").build();
+    public static final Selector classId = new SelectorBuilder().addAttribute(Attributes.studentClass).addColumn("classId").build();
 
     @Before
     public void setupH2() throws SQLException {
@@ -65,6 +56,7 @@ public class LoadIndicationTest {
     }
 
     @Test
+    @Ignore
     public void jdbcTemplateReference() {
         long start = System.currentTimeMillis();
         for (int i = 0; i < ITERATIONS; i++) {
@@ -81,8 +73,8 @@ public class LoadIndicationTest {
         final PlanCache planCache = new PlanCache(10, new H2PlanBuilder(statement, Arrays.asList(studentId, firstName, lastName, classId)));
         for (int i = 0; i < ITERATIONS; i++) {
             final Request request =
-                    new Request(Arrays.asList(studentIdAttr, lastNameAttr, classIdAttr),
-                            Arrays.asList(SimpleExpression.eq(classIdAttr.getProperty(), 1)));
+                    new Request(Arrays.asList(Attributes.studentId, Attributes.lastName, Attributes.studentClass),
+                            Arrays.asList(SimpleExpression.eq(Attributes.studentClass.getProperty(), 1)));
             Plan plan = planCache.getOrBuildPlan(request);
             EnrichedQueryResult result = plan.execute();
             Assert.assertEquals(RESULT_SIZE, result.getResults().length);

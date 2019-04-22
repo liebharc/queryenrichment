@@ -1,15 +1,11 @@
 package com.github.liebharc.queryenrichment;
 
-public class SelectorBuilder {
-    private Attribute attribute;
+public class SelectorBuilder<T> {
+    private Attribute<T> attribute;
     private String column;
 
-    public void addAttribute(Attribute attribute) {
+    public SelectorBuilder addAttribute(Attribute<T> attribute) {
         this.attribute = attribute;
-    }
-
-    public SelectorBuilder addAttribute(String domain, String property) {
-        this.attribute = new Attribute(domain, property);
         return this;
     }
 

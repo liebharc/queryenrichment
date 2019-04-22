@@ -8,30 +8,22 @@ import java.util.stream.Collectors;
 
 public class H2QueryBuilder implements QueryBuilder{
 
-    public static final Selector studentId = new SelectorBuilder().addAttribute("student", "id").addColumn("ID").build();
-    public static final Selector firstName = new SelectorBuilder().addAttribute("student", "firstName").addColumn("FIRST_NAME").build();
-    public static final Selector lastName = new SelectorBuilder().addAttribute("student", "lastName").addColumn("LAST_NAME").build();
 
-    public static final Attribute studentIdAttr = studentId.getAttribute();
-    public static final Attribute firstNameAttr = firstName.getAttribute();
-    public static final Attribute lastNameAttr = lastName.getAttribute();
-
-    public static final Selector fullName = new Enrichment(new Attribute("student", "fullName")) {
+    public static final Selector studentId = new SelectorBuilder().addAttribute(Attributes.studentId).addColumn("ID").build();
+    public static final Selector firstName = new SelectorBuilder().addAttribute(Attributes.firstName).addColumn("FIRST_NAME").build();
+    public static final Selector lastName = new SelectorBuilder().addAttribute(Attributes.lastName).addColumn("LAST_NAME").build();
+    public static final Selector studentClass = new SelectorBuilder().addAttribute(Attributes.studentClass).addColumn("CLASS").build();
+    public static final Selector fullName = new Enrichment(Attributes.fullName) {
         @Override
         public void enrich(IntermediateResult result) {
-            result.add(this, result.get(firstName.getAttribute()) + " " + result.get(lastName.getAttribute()));
+            result.add(this, result.get(Attributes.firstName) + " " + result.get(Attributes.lastName));
         }
 
         @Override
-        public List<Attribute> getDependencies() {
-            return Arrays.asList(firstName.getAttribute(), lastName.getAttribute());
+        public List<Attribute<?>> getDependencies() {
+            return Arrays.asList(Attributes.firstName, Attributes.lastName);
         }
     };
-
-
-    public static final Attribute fullNameAttr = fullName.getAttribute();
-
-    public static final Selector studentClass = new SelectorBuilder().addAttribute("student", "class").addColumn("CLASS").build();
 
     private final Statement statement;
 

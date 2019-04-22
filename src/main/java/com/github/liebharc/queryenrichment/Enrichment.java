@@ -5,11 +5,11 @@ import java.util.Optional;
 
 public abstract class Enrichment extends Selector {
 
-    public Enrichment(Attribute attribute) {
+    public Enrichment(Attribute<?> attribute) {
         this(attribute, null);
     }
 
-    public Enrichment(Attribute attribute, String columnOrNull) {
+    public Enrichment(Attribute<?> attribute, String columnOrNull) {
         super(attribute, columnOrNull);
     }
 
@@ -17,7 +17,7 @@ public abstract class Enrichment extends Selector {
     public abstract void enrich(IntermediateResult result);
 
     @Override
-    public abstract List<Attribute> getDependencies();
+    public abstract List<Attribute<?>> getDependencies();
 
     @Override
     public final Optional<String> getColumn() {

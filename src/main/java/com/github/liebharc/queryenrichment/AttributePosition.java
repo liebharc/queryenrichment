@@ -1,7 +1,7 @@
 package com.github.liebharc.queryenrichment;
 
 public class AttributePosition {
-    private final Attribute attribute;
+    private final Attribute<?> attribute;
     private final int position;
 
     public AttributePosition(Attribute attribute, int position) {

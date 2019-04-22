@@ -7,13 +7,9 @@ import java.util.stream.Collectors;
 public class InMemoryQueryBuilder implements QueryBuilder {
     public static final Database database = new Database();
 
-    public static final Selector studentId = new SelectorBuilder().addAttribute("student", "id").addColumn("ID").build();
-    public static final Selector firstName = new SelectorBuilder().addAttribute("student", "firstName").addColumn("FIRST_NAME").build();
-    public static final Selector lastName = new SelectorBuilder().addAttribute("student", "lastName").addColumn("LAST_NAME").build();
-
-    public static final Attribute studentIdAttr = studentId.getAttribute();
-    public static final Attribute firstNameAttr = firstName.getAttribute();
-    public static final Attribute lastNameAttr = lastName.getAttribute();
+    public static final Selector studentId = new SelectorBuilder().addAttribute(Attributes.studentId).addColumn("ID").build();
+    public static final Selector firstName = new SelectorBuilder().addAttribute(Attributes.firstName).addColumn("FIRST_NAME").build();
+    public static final Selector lastName = new SelectorBuilder().addAttribute(Attributes.lastName).addColumn("LAST_NAME").build();
 
     public InMemoryQueryBuilder() {
     }

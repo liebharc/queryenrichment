@@ -1,5 +1,7 @@
 package com.github.liebharc.queryenrichment;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,7 +14,7 @@ public class SchemaDocumentation {
 
     }
 
-    public String drawSchema(List<Attribute> attributes) {
+    public String drawSchema(Collection<Attribute<?>> attributes) {
         final StringBuilder result = new StringBuilder();
         final Map<String, List<Attribute>> byDomain =
                 attributes.stream().collect(Collectors.groupingBy(attribute -> attribute.getDomain()));
@@ -20,10 +22,12 @@ public class SchemaDocumentation {
             result.append(domain);
             result.append(":");
             result.append("\n");
-            byDomain.get(domain).stream().map(attr -> attr.getProperty()).sorted().forEach(prop -> {
+            byDomain.get(domain).stream().sorted(Comparator.comparing(Attribute::getProperty)).forEach(attr -> {
                 result.append("\t");
                 result.append(" - ");
-                result.append(prop);
+                result.append(attr.getProperty());
+                result.append(": ");
+                result.append(attr.getAttributeClass().getSimpleName());
                 result.append("\n");
             });
         });

@@ -42,9 +42,9 @@ public class H2PlanBuilderTest {
 
         final Plan plan = planBuilder.build(
                 new Request(
-                        Arrays.asList(H2QueryBuilder.studentIdAttr,
-                                H2QueryBuilder.lastNameAttr,
-                                H2QueryBuilder.firstNameAttr)));
+                        Arrays.asList(Attributes.studentId,
+                                Attributes.lastName,
+                                Attributes.firstName)));
 
         final String stringResult = this.resultToString(plan.execute());
         Assert.assertEquals(
@@ -60,9 +60,9 @@ public class H2PlanBuilderTest {
         final SimpleExpression criterion = SimpleExpression.neq("id", 11);
         final Plan plan = planBuilder.build(
                 new Request(
-                        Arrays.asList(H2QueryBuilder.studentIdAttr,
-                                H2QueryBuilder.lastNameAttr,
-                                H2QueryBuilder.firstNameAttr),
+                        Arrays.asList(Attributes.studentId,
+                                Attributes.lastName,
+                                Attributes.firstName),
                         Arrays.asList(criterion)));
 
         final String stringResult = this.resultToString(plan.execute());
@@ -78,9 +78,9 @@ public class H2PlanBuilderTest {
         final SimpleExpression criterion = SimpleExpression.eq("firstName", "David");
         final Plan plan = planBuilder.build(
                 new Request(
-                        Arrays.asList(H2QueryBuilder.studentIdAttr,
-                                H2QueryBuilder.lastNameAttr,
-                                H2QueryBuilder.firstNameAttr),
+                        Arrays.asList(Attributes.studentId,
+                                Attributes.lastName,
+                                Attributes.firstName),
                         Arrays.asList(criterion)));
 
         Assert.assertEquals(2, plan.getSelectors().stream().filter(sel -> !(sel instanceof FromFilterEnrichment)).count());
@@ -97,9 +97,9 @@ public class H2PlanBuilderTest {
         final SimpleExpression criterion = SimpleExpression.eq("firstName", "David");
         final Plan plan = planBuilder.build(
                 new Request(
-                        Arrays.asList(H2QueryBuilder.studentIdAttr,
-                                H2QueryBuilder.lastNameAttr,
-                                H2QueryBuilder.firstNameAttr),
+                        Arrays.asList(Attributes.studentId,
+                                Attributes.lastName,
+                                Attributes.firstName),
                         Arrays.asList(criterion)));
         EnrichedQueryResult result = plan.execute();
         Assert.assertEquals(
@@ -113,10 +113,10 @@ public class H2PlanBuilderTest {
 
         final Plan plan = planBuilder.build(
                 new Request(
-                        Arrays.asList(H2QueryBuilder.studentIdAttr,
-                                H2QueryBuilder.firstNameAttr,
-                                H2QueryBuilder.lastNameAttr,
-                                H2QueryBuilder.fullNameAttr)));
+                        Arrays.asList(Attributes.studentId,
+                                Attributes.firstName,
+                                Attributes.lastName,
+                                Attributes.fullName)));
         EnrichedQueryResult result = plan.execute();
         Assert.assertEquals(
                 "10,David,Tenant,David Tenant\n" +
@@ -130,8 +130,8 @@ public class H2PlanBuilderTest {
 
         final Plan plan = planBuilder.build(
                 new Request(
-                        Arrays.asList(H2QueryBuilder.studentIdAttr,
-                                H2QueryBuilder.fullNameAttr)));
+                        Arrays.asList(Attributes.studentId,
+                                Attributes.fullName)));
         EnrichedQueryResult result = plan.execute();
         Assert.assertEquals(
                 "10,David Tenant\n" +

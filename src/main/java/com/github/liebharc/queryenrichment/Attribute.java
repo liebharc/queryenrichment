@@ -2,14 +2,20 @@ package com.github.liebharc.queryenrichment;
 
 import java.util.Objects;
 
-public class Attribute {
+public class Attribute<T> {
 
+    private final Class<T> attributeClass;
     private final String domain;
     private final String property;
 
-    public Attribute(String domain, String property) {
+    public Attribute(Class<T> attributeClass, String domain, String property) {
+        this.attributeClass = attributeClass;
         this.domain = domain;
         this.property = property;
+    }
+
+    public Class<T> getAttributeClass() {
+        return attributeClass;
     }
 
     public String getDomain() {

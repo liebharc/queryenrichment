@@ -96,7 +96,7 @@ public abstract class PlanBuilder {
 
     private List<SimpleExpression> translatePropertyNames(String domain, List<SimpleExpression> criteria) {
         return criteria.stream().map(expr -> {
-            Attribute attribute = new Attribute(domain, expr.getPropertyName());
+            Attribute attribute = new Attribute(expr.getValue().getClass(), domain, expr.getPropertyName());
             Optional<String> selector = Optional.ofNullable(attributeToSelector.get(attribute)).flatMap(sel -> sel.getColumn());
             if (selector.isPresent()) {
                 return new SimpleExpression(selector.get(), expr.getOperation(), expr.getValue());
