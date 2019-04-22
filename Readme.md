@@ -25,6 +25,12 @@ it easily gets important to avoid double effort here.
 
 This project is an experimation area to toy around with those ideas.
 
+## Preliminary results
+
+So far the performance results seem to indicate that this approach might work better. The coding effort compared to an
+ORM is of course much higher, but at the same time the ORM is only one of the steps described above. Therefore the coding
+effort might be comparable to other solutions.
+
 ## Build
 
 ```
