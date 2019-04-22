@@ -12,15 +12,15 @@ public class IntermediateResult {
 
     private final Map<Attribute, Object> results = new HashMap<>();
 
-    public void add(Selector selector, Object result) {
+    public<T> void add(Selector selector, T result) {
         results.put(selector.getAttribute(), result);
     }
 
-    public Object get(Attribute attribute) {
-        return results.get(attribute);
+    public<T> T get(Attribute<T> attribute) {
+        return (T)results.get(attribute);
     }
 
-    public void addFromQuery(Selector selector) {
+    public void addFromQuery(Selector<?> selector) {
         // Plan builder ensures that we can rely on the query result position here
         results.put(selector.getAttribute(), queryResult.get(queryResultPos));
     }

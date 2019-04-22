@@ -4,14 +4,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class Selector {
+public class Selector<T> {
 
     public static final String NO_COLUMN = null;
 
-    private final Attribute<?> attributes;
+    private final Attribute<T> attributes;
     private final String column;
 
-    public Selector(Attribute<?> attribute, String columnOrNull) {
+    public Selector(Attribute<T> attribute, String columnOrNull) {
         this.attributes = attribute;
         this.column = columnOrNull;
     }
@@ -20,7 +20,7 @@ public class Selector {
         return Optional.ofNullable(column);
     }
 
-    public Attribute<?> getAttribute() {
+    public Attribute<T> getAttribute() {
         return attributes;
     }
 

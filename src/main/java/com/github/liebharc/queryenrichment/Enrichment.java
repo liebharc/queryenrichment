@@ -3,13 +3,13 @@ package com.github.liebharc.queryenrichment;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class Enrichment extends Selector {
+public abstract class Enrichment<T> extends Selector<T> {
 
-    public Enrichment(Attribute<?> attribute) {
+    public Enrichment(Attribute<T> attribute) {
         this(attribute, null);
     }
 
-    public Enrichment(Attribute<?> attribute, String columnOrNull) {
+    public Enrichment(Attribute<T> attribute, String columnOrNull) {
         super(attribute, columnOrNull);
     }
 

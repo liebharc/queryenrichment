@@ -9,11 +9,11 @@ import java.util.stream.Collectors;
 public class H2QueryBuilder implements QueryBuilder{
 
 
-    public static final Selector studentId = new SelectorBuilder().addAttribute(Attributes.studentId).addColumn("ID").build();
-    public static final Selector firstName = new SelectorBuilder().addAttribute(Attributes.firstName).addColumn("FIRST_NAME").build();
-    public static final Selector lastName = new SelectorBuilder().addAttribute(Attributes.lastName).addColumn("LAST_NAME").build();
-    public static final Selector studentClass = new SelectorBuilder().addAttribute(Attributes.studentClass).addColumn("CLASS").build();
-    public static final Selector fullName = new Enrichment(Attributes.fullName) {
+    public static final Selector<Long> studentId = new SelectorBuilder().addAttribute(Attributes.studentId).addColumn("ID").build();
+    public static final Selector<String> firstName = new SelectorBuilder().addAttribute(Attributes.firstName).addColumn("FIRST_NAME").build();
+    public static final Selector<String> lastName = new SelectorBuilder().addAttribute(Attributes.lastName).addColumn("LAST_NAME").build();
+    public static final Selector<Long> studentClass = new SelectorBuilder().addAttribute(Attributes.studentClass).addColumn("CLASS").build();
+    public static final Selector<String> fullName = new Enrichment<String>(Attributes.fullName) {
         @Override
         public void enrich(IntermediateResult result) {
             result.add(this, result.get(Attributes.firstName) + " " + result.get(Attributes.lastName));
@@ -32,7 +32,7 @@ public class H2QueryBuilder implements QueryBuilder{
     }
 
     @Override
-    public com.github.liebharc.queryenrichment.Query build(List<Selector> selectors, String domain, List<SimpleExpression> filters) {
+    public com.github.liebharc.queryenrichment.Query build(List<Selector<?>> selectors, String domain, List<SimpleExpression> filters) {
         if (selectors.isEmpty()) {
             throw  new IllegalArgumentException("At least one attribute must be selected");
         }
@@ -64,9 +64,9 @@ public class H2QueryBuilder implements QueryBuilder{
     private class Query implements com.github.liebharc.queryenrichment.Query {
 
         private final String query;
-        private final List<Selector> selectors;
+        private final List<Selector<?>> selectors;
 
-        public Query(String query, List<Selector> selectors) {
+        public Query(String query, List<Selector<?>> selectors) {
             this.query = query;
             this.selectors = selectors;
         }

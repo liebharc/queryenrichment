@@ -11,7 +11,7 @@ public class InMemoryPlanBuilderTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void invalidSelectorsTest() {
-        final List<Selector> selectors =
+        final List<Selector<?>> selectors =
                 Arrays.asList(
                         InMemoryQueryBuilder.studentId,
                         InMemoryQueryBuilder.studentId);
@@ -20,7 +20,7 @@ public class InMemoryPlanBuilderTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void multipleDomainsTest() {
-        final List<Selector> selectors =
+        final List<Selector<?>> selectors =
                 Arrays.asList(
                         InMemoryQueryBuilder.studentId,
                         new SelectorBuilder().addAttribute(Attributes.teacherId).addColumn("ID").build());
@@ -30,7 +30,7 @@ public class InMemoryPlanBuilderTest {
 
     @Test
     public void findSelectorsSimpleTest() {
-        final List<Selector> selectors =
+        final List<Selector<?>> selectors =
                 Arrays.asList(
                     InMemoryQueryBuilder.studentId,
                     InMemoryQueryBuilder.firstName,
@@ -47,12 +47,12 @@ public class InMemoryPlanBuilderTest {
                                     Attributes.lastName,
                                     Attributes.firstName)));
 
-        Assert.assertArrayEquals(plan.getSelectors().toArray(new Selector[0]), new Selector[] { selectors.get(0), selectors.get(2), selectors.get(1) });
+        Assert.assertArrayEquals(plan.getSelectors().toArray(new Selector<?>[0]), new Selector<?>[] { selectors.get(0), selectors.get(2), selectors.get(1) });
     }
 
     @Test
     public void planCacheTest() {
-        final List<Selector> selectors =
+        final List<Selector<?>> selectors =
                 Arrays.asList(
                         InMemoryQueryBuilder.studentId,
                         InMemoryQueryBuilder.firstName,

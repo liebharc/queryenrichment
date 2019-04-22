@@ -10,5 +10,5 @@ public interface QueryBuilder {
      * @param filters Filter or where expression
      * @return Query object
      */
-    Query build(List<Selector> selectors, String domain, List<SimpleExpression> filters);
+    Query build(List<Selector<?>> selectors, String domain, List<SimpleExpression> filters);
 }

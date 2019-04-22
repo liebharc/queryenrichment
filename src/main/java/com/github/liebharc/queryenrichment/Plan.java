@@ -6,12 +6,12 @@ import java.util.Map;
 
 public class Plan {
     private final List<Attribute> attributes;
-    private final List<Selector> selectors;
+    private final List<Selector<?>> selectors;
     private final List<AttributePosition> lookupTable;
     private final Query query;
     private final ExecutionStatistics statistics = new ExecutionStatistics();
 
-    public Plan(List<Attribute> attributes, List<Selector> selectors, List<AttributePosition> lookupTable, Query query) {
+    public Plan(List<Attribute> attributes, List<Selector<?>> selectors, List<AttributePosition> lookupTable, Query query) {
         this.attributes = attributes;
         this.selectors = Collections.unmodifiableList(selectors);
         this.lookupTable = lookupTable;
@@ -28,7 +28,7 @@ public class Plan {
                 Object[] row = new Object[attributes.size()];
                 intermediateResult.nextRow(rows.get(i));
 
-                for (Selector selector : selectors) {
+                for (Selector<?> selector : selectors) {
                     selector.enrich(intermediateResult);
                     intermediateResult.nextColumn();
                 }
@@ -47,7 +47,7 @@ public class Plan {
         }
     }
 
-    List<Selector> getSelectors() {
+    List<Selector<?>> getSelectors() {
         return selectors;
     }
 }

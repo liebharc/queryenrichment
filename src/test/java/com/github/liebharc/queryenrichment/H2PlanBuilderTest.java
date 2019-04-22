@@ -37,7 +37,7 @@ public class H2PlanBuilderTest {
 
     @Test
     public void queryTest() {
-        final List<Selector> selectors = this.createDefaultSeletors();
+        final List<Selector<?>> selectors = this.createDefaultSeletors();
         final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
 
         final Plan plan = planBuilder.build(
@@ -54,7 +54,7 @@ public class H2PlanBuilderTest {
 
     @Test
     public void withCriteriaTest() {
-        final List<Selector> selectors = this.createDefaultSeletors();
+        final List<Selector<?>> selectors = this.createDefaultSeletors();
         final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
 
         final SimpleExpression criterion = SimpleExpression.neq("id", 11);
@@ -72,7 +72,7 @@ public class H2PlanBuilderTest {
 
     @Test
     public void replaceSelectorByFilterTest() {
-        final List<Selector> selectors = this.createDefaultSeletors();
+        final List<Selector<?>> selectors = this.createDefaultSeletors();
         final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
 
         final SimpleExpression criterion = SimpleExpression.eq("firstName", "David");
@@ -91,7 +91,7 @@ public class H2PlanBuilderTest {
 
     @Test
     public void executeSimpleQueryTest() {
-        final List<Selector> selectors = this.createDefaultSeletors();
+        final List<Selector<?>> selectors = this.createDefaultSeletors();
         final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
 
         final SimpleExpression criterion = SimpleExpression.eq("firstName", "David");
@@ -108,7 +108,7 @@ public class H2PlanBuilderTest {
 
     @Test
     public void enrichmentWithManualDependencyResolutionTest() {
-        final List<Selector> selectors = this.createDefaultSeletors();
+        final List<Selector<?>> selectors = this.createDefaultSeletors();
         final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
 
         final Plan plan = planBuilder.build(
@@ -125,7 +125,7 @@ public class H2PlanBuilderTest {
 
     @Test
     public void enrichmentWithAutomaticDependencyResolutionTest() {
-        final List<Selector> selectors = this.createDefaultSeletors();
+        final List<Selector<?>> selectors = this.createDefaultSeletors();
         final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
 
         final Plan plan = planBuilder.build(
@@ -145,7 +145,7 @@ public class H2PlanBuilderTest {
                 .collect(Collectors.joining("\n"));
     }
 
-    private List<Selector> createDefaultSeletors() {
+    private List<Selector<?>> createDefaultSeletors() {
         return Arrays.asList(
                 H2QueryBuilder.studentId,
                 H2QueryBuilder.firstName,

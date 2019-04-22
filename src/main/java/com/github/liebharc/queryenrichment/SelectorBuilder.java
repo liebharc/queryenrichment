@@ -14,7 +14,7 @@ public class SelectorBuilder<T> {
         return this;
     }
 
-    public Selector build() {
-        return new Selector(attribute, column);
+    public Selector<T> build() {
+        return new Selector<>(attribute, column);
     }
 }

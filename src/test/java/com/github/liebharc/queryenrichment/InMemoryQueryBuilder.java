@@ -7,15 +7,15 @@ import java.util.stream.Collectors;
 public class InMemoryQueryBuilder implements QueryBuilder {
     public static final Database database = new Database();
 
-    public static final Selector studentId = new SelectorBuilder().addAttribute(Attributes.studentId).addColumn("ID").build();
-    public static final Selector firstName = new SelectorBuilder().addAttribute(Attributes.firstName).addColumn("FIRST_NAME").build();
-    public static final Selector lastName = new SelectorBuilder().addAttribute(Attributes.lastName).addColumn("LAST_NAME").build();
+    public static final Selector<Long> studentId = new SelectorBuilder().addAttribute(Attributes.studentId).addColumn("ID").build();
+    public static final Selector<String> firstName = new SelectorBuilder().addAttribute(Attributes.firstName).addColumn("FIRST_NAME").build();
+    public static final Selector<String> lastName = new SelectorBuilder().addAttribute(Attributes.lastName).addColumn("LAST_NAME").build();
 
     public InMemoryQueryBuilder() {
     }
 
     @Override
-    public com.github.liebharc.queryenrichment.Query build(List<Selector> selectors, String domain, List<SimpleExpression> filters) {
+    public com.github.liebharc.queryenrichment.Query build(List<Selector<?>> selectors, String domain, List<SimpleExpression> filters) {
         if (!filters.isEmpty()) {
             throw new IllegalArgumentException("This class doesn't support criteria");
         }
@@ -45,9 +45,9 @@ public class InMemoryQueryBuilder implements QueryBuilder {
 
     public class Query implements com.github.liebharc.queryenrichment.Query {
 
-        private final List<Selector> selectors;
+        private final List<Selector<?>> selectors;
 
-        public Query(List<Selector> selectors) {
+        public Query(List<Selector<?>> selectors) {
 
             this.selectors = selectors;
         }

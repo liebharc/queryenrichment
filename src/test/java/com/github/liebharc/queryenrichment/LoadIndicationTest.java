@@ -21,10 +21,10 @@ public class LoadIndicationTest {
     private JdbcDataSource dataSource;
     private JdbcTemplate jdbcTemplate;
 
-    public static final Selector studentId = new SelectorBuilder().addAttribute(Attributes.studentId).addColumn("ID").build();
-    public static final Selector firstName = new SelectorBuilder().addAttribute(Attributes.firstName).addColumn("firstName").build();
-    public static final Selector lastName = new SelectorBuilder().addAttribute(Attributes.lastName).addColumn("lastName").build();
-    public static final Selector classId = new SelectorBuilder().addAttribute(Attributes.studentClass).addColumn("classId").build();
+    public static final Selector<Long> studentId = new SelectorBuilder().addAttribute(Attributes.studentId).addColumn("ID").build();
+    public static final Selector<String> firstName = new SelectorBuilder().addAttribute(Attributes.firstName).addColumn("firstName").build();
+    public static final Selector<String> lastName = new SelectorBuilder().addAttribute(Attributes.lastName).addColumn("lastName").build();
+    public static final Selector<Long> classId = new SelectorBuilder().addAttribute(Attributes.studentClass).addColumn("classId").build();
 
     @Before
     public void setupH2() throws SQLException {

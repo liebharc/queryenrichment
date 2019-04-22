@@ -4,16 +4,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class PlanBuilder {
-    private final Map<Attribute, Selector> attributeToSelector = new HashMap<Attribute, Selector>();
+    private final Map<Attribute, Selector<?>> attributeToSelector = new HashMap<>();
 
-    public PlanBuilder(List<Selector> selectors) {
+    public PlanBuilder(List<Selector<?>> selectors) {
         final StringBuilder errorBuilder = new StringBuilder(0);
 
-        for (Selector selector : selectors) {
-            Selector previousMapping= this.attributeToSelector.put(selector.getAttribute(), selector);
+        for (Selector<?> selector : selectors) {
+            Selector<?> previousMapping= this.attributeToSelector.put(selector.getAttribute(), selector);
 
             if (previousMapping != null) {
-                errorBuilder.append(selector.getAttribute() + "  has more than one selector; " + previousMapping + " and " + selector + "\n");
+                errorBuilder.append(selector.getAttribute())
+                        .append("  has more than one selector; ")
+                        .append(previousMapping).append(" and ")
+                        .append(selector).append("\n");
             }
         }
 
@@ -36,12 +39,12 @@ public abstract class PlanBuilder {
 
         // IntermediateResult requires that all selectors which require a filter are first in the list, the order method
         // ensures that this holds true
-        final List<Selector> selectors =
+        final List<Selector<?>> selectors =
                 this.orderSelectorsByDependencies(
                         this.addDependencies(
                             this.findRequiredSelectors(request)));
         final List<SimpleExpression> filters = this.translatePropertyNames(domain, request.getCriteria());
-        final List<Selector> queryColumns = selectors.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
+        final List<Selector<?>> queryColumns = selectors.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
         return new Plan(request.getAttributes(), selectors, this.createLookupTable(request.getAttributes()), this.getQueryBuilder().build(queryColumns, domain, filters));
     }
 
@@ -50,15 +53,15 @@ public abstract class PlanBuilder {
         return attributes.stream().anyMatch(attr -> !attr.getDomain().equals(domain));
     }
 
-    private List<Selector> findRequiredSelectors(Request request) {
+    private List<Selector<?>> findRequiredSelectors(Request request) {
         Map<String, SimpleExpression> equalityFilters = request.getCriteria().stream()
-                .filter(expr -> this.isEqualityExpression(expr))
-                .collect(Collectors.toMap(expr -> expr.getPropertyName(), expr -> expr));
+                .filter(this::isEqualityExpression)
+                .collect(Collectors.toMap(SimpleExpression::getPropertyName, expr -> expr));
 
         return request.getAttributes().stream().map(attr -> {
             SimpleExpression filterExpression = equalityFilters.get(attr.getProperty());
             if (filterExpression != null) {
-                return new FromFilterEnrichment(attr, filterExpression);
+                return new FromFilterEnrichment<>(attr, filterExpression);
             }
             else {
                 return attributeToSelector.get(attr);
@@ -67,43 +70,38 @@ public abstract class PlanBuilder {
     }
 
 
-    private List<Selector> addDependencies(List<Selector> requiredSelectors) {
-        final List<Selector> result = new ArrayList<>();
-        for (Selector selector : requiredSelectors) {
+    private List<Selector<?>> addDependencies(List<Selector<?>> requiredSelectors) {
+        final List<Selector<?>> result = new ArrayList<>();
+        for (Selector<?> selector : requiredSelectors) {
             this.addDependency(result, selector);
         }
 
         return result;
     }
 
-    private void addDependency(List<Selector> result, Selector item) {
+    private void addDependency(List<Selector<?>> result, Selector<?> item) {
         if (result.contains(item)) {
             return;
         }
 
         result.add(item);
 
-        for (Attribute dependency : item.getDependencies()) {
+        for (Attribute<?> dependency : item.getDependencies()) {
             this.addDependency(result, attributeToSelector.get(dependency));
         }
     }
 
-    private List<Selector> orderSelectorsByDependencies(List<Selector> selectors) {
-        Map<Boolean, List<Selector>> directColumns
+    private List<Selector<?>> orderSelectorsByDependencies(List<Selector<?>> selectors) {
+        Map<Boolean, List<Selector<?>>> directColumns
                 = selectors.stream().collect(Collectors.partitioningBy(sel -> sel.getColumn().isPresent()));
         return TopologicalSort.INSTANCE.sort(directColumns.get(false), directColumns.get(true), attributeToSelector);
     }
 
     private List<SimpleExpression> translatePropertyNames(String domain, List<SimpleExpression> criteria) {
         return criteria.stream().map(expr -> {
-            Attribute attribute = new Attribute(expr.getValue().getClass(), domain, expr.getPropertyName());
-            Optional<String> selector = Optional.ofNullable(attributeToSelector.get(attribute)).flatMap(sel -> sel.getColumn());
-            if (selector.isPresent()) {
-                return new SimpleExpression(selector.get(), expr.getOperation(), expr.getValue());
-            }
-            else {
-                return expr;
-            }
+            final Attribute<?> attribute = new Attribute<>(expr.getValue().getClass(), domain, expr.getPropertyName());
+            final Optional<String> selector = Optional.ofNullable(attributeToSelector.get(attribute)).flatMap(Selector::getColumn);
+            return selector.map(s -> new SimpleExpression(s, expr.getOperation(), expr.getValue())).orElse(expr);
         }).collect(Collectors.toList());
     }
 

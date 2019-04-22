@@ -3,7 +3,7 @@ package com.github.liebharc.queryenrichment;
 import java.util.Collections;
 import java.util.List;
 
-public class FromFilterEnrichment extends Enrichment {
+public class FromFilterEnrichment<T> extends Enrichment<T> {
 
     private final SimpleExpression expression;
 
