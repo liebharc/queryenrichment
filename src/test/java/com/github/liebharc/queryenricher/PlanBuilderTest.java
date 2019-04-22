@@ -7,8 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
-
 public class PlanBuilderTest {
 
     @Test(expected = IllegalArgumentException.class)
@@ -43,13 +41,33 @@ public class PlanBuilderTest {
 
         final PlanBuilder planBuilder = new InMemoryPlanBuilder(selectors);
 
-        Plan plan = planBuilder.build(
+        final Plan plan = planBuilder.build(
                         new Request(
                             Arrays.asList(InMemoryQueryBuilder.studentIdAttr,
                                     InMemoryQueryBuilder.lastNameAttr,
                                     InMemoryQueryBuilder.firstNameAttr)));
 
         Assert.assertArrayEquals(plan.getSelectors().toArray(new Selector[0]), new Selector[] { selectors.get(0), selectors.get(2), selectors.get(1) });
+    }
+
+    @Test
+    public void planCacheTest() {
+        final List<Selector> selectors =
+                Arrays.asList(
+                        InMemoryQueryBuilder.studentId,
+                        InMemoryQueryBuilder.firstName,
+                        InMemoryQueryBuilder.lastName);
+
+        final PlanBuilder planBuilder = new InMemoryPlanBuilder(selectors);
+        final PlanCache planCache = new PlanCache(10, planBuilder);
+        final Request request = new Request(
+                Arrays.asList(InMemoryQueryBuilder.studentIdAttr,
+                        InMemoryQueryBuilder.lastNameAttr,
+                        InMemoryQueryBuilder.firstNameAttr));
+
+        final Plan plan1 = planCache.getOrBuildPlan(request);
+        final Plan plan2 = planCache.getOrBuildPlan(request);
+        Assert.assertSame(plan1, plan2);
     }
 
     @Test
