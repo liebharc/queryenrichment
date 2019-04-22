@@ -47,6 +47,11 @@ public class H2QueryBuilder implements QueryBuilder{
         query.append(" FROM ");
         query.append(domain);
 
+        if (!request.getCriteria().isEmpty()) {
+            query.append(" WHERE ");
+            query.append(request.getSqlCriteria());
+        }
+
         return new Query(query.toString(), selectors);
     }
 

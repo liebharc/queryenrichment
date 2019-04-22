@@ -1,8 +1,8 @@
 package com.github.liebharc.queryenricher;
 
-public abstract class Enricher extends Selector {
+public abstract class Enrichment extends Selector {
 
-    public Enricher(Attribute attribute, String columnOrNull) {
+    public Enrichment(Attribute attribute, String columnOrNull) {
         super(attribute, columnOrNull);
     }
 

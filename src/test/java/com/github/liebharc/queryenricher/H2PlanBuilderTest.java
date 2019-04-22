@@ -1,6 +1,8 @@
 package com.github.liebharc.queryenricher;
 
-import org.h2.tools.Server;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.SimpleExpression;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,5 +56,33 @@ public class H2PlanBuilderTest {
         Assert.assertEquals(
                 "10,Tenant,David\n" +
                 "11,Smith,Matt", stringResult);
+    }
+
+    @Test
+    public void withCriteriaTest() {
+        final List<Selector> selectors =
+                Arrays.asList(
+                        H2QueryBuilder.studentId,
+                        H2QueryBuilder.firstName,
+                        H2QueryBuilder.lastName);
+
+        final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+
+        final SimpleExpression criterion = Restrictions.eq("id", 10);
+        final Plan plan = planBuilder.build(
+                new Request(
+                        Arrays.asList(InMemoryQueryBuilder.studentIdAttr,
+                                InMemoryQueryBuilder.lastNameAttr,
+                                InMemoryQueryBuilder.firstNameAttr),
+                        Arrays.asList(criterion)));
+
+        final QueryResult queryResult = plan.getQuery().query();
+        final String stringResult =
+                queryResult.getRows().stream()
+                        .map(row -> row.stream()
+                                .map(cell -> cell.toString()).collect(Collectors.joining(",")))
+                        .collect(Collectors.joining("\n"));
+        Assert.assertEquals(
+                "10,Tenant,David", stringResult);
     }
 }
