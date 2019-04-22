@@ -27,7 +27,7 @@ public class PlanBuilderTest {
                         InMemoryQueryBuilder.studentId,
                         new SelectorBuilder().addAttribute("teacher", "id").addColumn("ID").build());
         InMemoryPlanBuilder planBuilder = new InMemoryPlanBuilder(selectors);
-        planBuilder.build(selectors.stream().map(sel -> sel.getAttribute()).collect(Collectors.toList()));
+        planBuilder.build(new Request(selectors.stream().map(sel -> sel.getAttribute()).collect(Collectors.toList())));
     }
 
     @Test
@@ -44,9 +44,10 @@ public class PlanBuilderTest {
         final PlanBuilder planBuilder = new InMemoryPlanBuilder(selectors);
 
         Plan plan = planBuilder.build(
-                        Arrays.asList(InMemoryQueryBuilder.studentIdAttr,
-                                InMemoryQueryBuilder.lastNameAttr,
-                                InMemoryQueryBuilder.firstNameAttr));
+                        new Request(
+                            Arrays.asList(InMemoryQueryBuilder.studentIdAttr,
+                                    InMemoryQueryBuilder.lastNameAttr,
+                                    InMemoryQueryBuilder.firstNameAttr)));
 
         Assert.assertArrayEquals(plan.getSelectors().toArray(new Selector[0]), new Selector[] { selectors.get(0), selectors.get(2), selectors.get(1) });
     }
@@ -63,9 +64,11 @@ public class PlanBuilderTest {
         InMemoryQueryBuilder.database.setup(
                 new Student(10, "David", "Tenant"),
                 new Student(11, "Matt", "Smith"));
-        Plan plan = planBuilder.build(Arrays.asList(
-                InMemoryQueryBuilder.lastNameAttr,
-                InMemoryQueryBuilder.firstNameAttr));
+        Plan plan = planBuilder.build(
+                new Request(
+                    Arrays.asList(
+                        InMemoryQueryBuilder.lastNameAttr,
+                        InMemoryQueryBuilder.firstNameAttr)));
         QueryResult result = plan.getQuery().query();
     }
 }

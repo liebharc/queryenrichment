@@ -24,7 +24,7 @@ public class InMemoryQueryBuilder implements QueryBuilder {
     }
 
     @Override
-    public com.github.liebharc.queryenricher.Query build(List<Selector> selectors) {
+    public com.github.liebharc.queryenricher.Query build(Request request, List<Selector> selectors) {
         return new Query(selectors);
     }
 

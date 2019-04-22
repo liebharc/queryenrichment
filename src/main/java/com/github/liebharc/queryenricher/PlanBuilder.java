@@ -25,14 +25,14 @@ public abstract class PlanBuilder {
         }
     }
 
-    public Plan build(List<Attribute> attributes) {
-        if (this.hasMultipleDomains(attributes)) {
+    public Plan build(Request request) {
+        if (this.hasMultipleDomains(request.getAttributes())) {
             throw new IllegalArgumentException("Can't query for multiple domain in one request");
         }
 
-        List<Selector> selectors = this.findRequiredSelectors(attributes);
+        List<Selector> selectors = this.findRequiredSelectors(request.getAttributes());
         List<Selector> queryColumns = selectors.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
-        return new Plan(selectors, this.getBuilder(this.createLookupTable(selectors)).build(queryColumns));
+        return new Plan(selectors, this.getQueryBuilder(request, this.createLookupTable(selectors)).build(request, queryColumns));
     }
 
     private boolean hasMultipleDomains(List<Attribute> attributes) {
@@ -57,5 +57,5 @@ public abstract class PlanBuilder {
         return lookup;
     }
 
-    protected abstract QueryBuilder getBuilder(Map<Selector, Integer> lookupTable);
+    protected abstract QueryBuilder getQueryBuilder(Request request, Map<Selector, Integer> lookupTable);
 }

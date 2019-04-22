@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface QueryBuilder {
 
-    Query build(List<Selector> selectors);
+    Query build(Request request, List<Selector> selectors);
 }
