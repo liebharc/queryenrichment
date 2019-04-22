@@ -10,6 +10,15 @@ import static org.junit.Assert.*;
 
 public class PlanBuilderTest {
 
+    @Test(expected = IllegalArgumentException.class)
+    public void invalidSelectors() {
+        final List<Selector> selectors =
+                Arrays.asList(
+                        new SelectorBuilder().addAttribute("student", "id").addColumn("ID").build(),
+                        new SelectorBuilder().addAttribute("student", "id").addColumn("ID").build());
+        new PlanBuilder(selectors);
+    }
+
     @Test
     public void findSelectorsSimple() {
         final List<Selector> selectors =
@@ -28,6 +37,6 @@ public class PlanBuilderTest {
                         new Attribute("student", "lastName"),
                         new Attribute("student", "firstName")));
 
-        Assert.assertNotNull(plan);
+        Assert.assertArrayEquals(plan.getSelectors().toArray(new Selector[0]), new Selector[] { selectors.get(0), selectors.get(2), selectors.get(1) });
     }
 }
