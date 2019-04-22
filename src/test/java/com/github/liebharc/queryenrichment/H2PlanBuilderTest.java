@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,7 +64,7 @@ public class H2PlanBuilderTest {
                         Arrays.asList(Attributes.studentId,
                                 Attributes.lastName,
                                 Attributes.firstName),
-                        Arrays.asList(criterion)));
+                        Collections.singletonList(criterion)));
 
         final String stringResult = this.resultToString(plan.execute());
         Assert.assertEquals(
@@ -81,7 +82,7 @@ public class H2PlanBuilderTest {
                         Arrays.asList(Attributes.studentId,
                                 Attributes.lastName,
                                 Attributes.firstName),
-                        Arrays.asList(criterion)));
+                        Collections.singletonList(criterion)));
 
         Assert.assertEquals(2, plan.getSelectors().stream().filter(sel -> !(sel instanceof FromFilterEnrichment)).count());
         final String stringResult = this.resultToString(plan.execute());
@@ -100,7 +101,7 @@ public class H2PlanBuilderTest {
                         Arrays.asList(Attributes.studentId,
                                 Attributes.lastName,
                                 Attributes.firstName),
-                        Arrays.asList(criterion)));
+                        Collections.singletonList(criterion)));
         EnrichedQueryResult result = plan.execute();
         Assert.assertEquals(
                 "10,Tenant,David", this.resultToString(result));
@@ -141,7 +142,7 @@ public class H2PlanBuilderTest {
     private String resultToString(EnrichedQueryResult result) {
         return Arrays.stream(result.getResults())
                 .map(row -> Arrays.stream(row)
-                        .map(cell -> cell.toString()).collect(Collectors.joining(",")))
+                        .map(Object::toString).collect(Collectors.joining(",")))
                 .collect(Collectors.joining("\n"));
     }
 

@@ -9,7 +9,7 @@ public class AttributePosition {
         this.position = position;
     }
 
-    public Attribute getAttribute() {
+    public Attribute<?> getAttribute() {
         return attribute;
     }
 

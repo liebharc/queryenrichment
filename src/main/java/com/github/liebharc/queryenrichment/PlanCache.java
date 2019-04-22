@@ -4,6 +4,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 public class PlanCache {
 
     private final LoadingCache<Request, Plan> plans;
@@ -14,6 +16,7 @@ public class PlanCache {
                 .build(
                         new CacheLoader<Request, Plan>() {
                             @Override
+                            @ParametersAreNonnullByDefault
                             public Plan load(Request request) {
                                 return planBuilder.build(request);
                             }

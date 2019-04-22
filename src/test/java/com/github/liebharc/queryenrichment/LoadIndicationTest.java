@@ -21,10 +21,10 @@ public class LoadIndicationTest {
     private JdbcDataSource dataSource;
     private JdbcTemplate jdbcTemplate;
 
-    public static final Selector<Long> studentId = new SelectorBuilder().addAttribute(Attributes.studentId).addColumn("ID").build();
-    public static final Selector<String> firstName = new SelectorBuilder().addAttribute(Attributes.firstName).addColumn("firstName").build();
-    public static final Selector<String> lastName = new SelectorBuilder().addAttribute(Attributes.lastName).addColumn("lastName").build();
-    public static final Selector<Long> classId = new SelectorBuilder().addAttribute(Attributes.studentClass).addColumn("classId").build();
+    public static final Selector<Long> studentId = new SelectorBuilder<>(Attributes.studentId).addColumn("ID").build();
+    public static final Selector<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("firstName").build();
+    public static final Selector<String> lastName = new SelectorBuilder<>(Attributes.lastName).addColumn("lastName").build();
+    public static final Selector<Long> classId = new SelectorBuilder<>(Attributes.studentClass).addColumn("classId").build();
 
     @Before
     public void setupH2() throws SQLException {
@@ -83,6 +83,8 @@ public class LoadIndicationTest {
         System.out.print("Duration [ms]: " + (System.currentTimeMillis() - start));
     }
 
+    // Getters/setters are required by JDBC template
+    @SuppressWarnings("unused")
     public static class StudentDAO {
         private long id;
         private String firstName;

@@ -17,7 +17,7 @@ public class SchemaDocumentation {
     public String drawSchema(Collection<Attribute<?>> attributes) {
         final StringBuilder result = new StringBuilder();
         final Map<String, List<Attribute>> byDomain =
-                attributes.stream().collect(Collectors.groupingBy(attribute -> attribute.getDomain()));
+                attributes.stream().collect(Collectors.groupingBy(Attribute::getDomain));
         byDomain.keySet().stream().sorted().forEach(domain -> {
             result.append(domain);
             result.append(":");

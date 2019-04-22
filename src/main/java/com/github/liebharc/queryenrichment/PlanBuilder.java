@@ -48,7 +48,7 @@ public abstract class PlanBuilder {
         return new Plan(request.getAttributes(), selectors, this.createLookupTable(request.getAttributes()), this.getQueryBuilder().build(queryColumns, domain, filters));
     }
 
-    private boolean hasMultipleDomains(List<Attribute> attributes) {
+    private boolean hasMultipleDomains(List<Attribute<?>> attributes) {
         final String domain = attributes.get(0).getDomain();
         return attributes.stream().anyMatch(attr -> !attr.getDomain().equals(domain));
     }
@@ -114,7 +114,7 @@ public abstract class PlanBuilder {
         return expr.getOperation().equals("=");
     }
 
-    private List<AttributePosition> createLookupTable(List<Attribute> attributes) {
+    private List<AttributePosition> createLookupTable(List<Attribute<?>> attributes) {
         final List<AttributePosition> lookup = new ArrayList<>(attributes.size());
         for (int i = 0; i < attributes.size(); i++) {
             lookup.add(new AttributePosition(attributes.get(i), i));

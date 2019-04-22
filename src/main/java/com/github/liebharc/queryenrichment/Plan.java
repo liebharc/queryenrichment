@@ -4,13 +4,13 @@ import java.util.Collections;
 import java.util.List;
 
 public class Plan {
-    private final List<Attribute> attributes;
+    private final List<Attribute<?>> attributes;
     private final List<Selector<?>> selectors;
     private final List<AttributePosition> lookupTable;
     private final Query query;
     private final ExecutionStatistics statistics = new ExecutionStatistics();
 
-    public Plan(List<Attribute> attributes, List<Selector<?>> selectors, List<AttributePosition> lookupTable, Query query) {
+    public Plan(List<Attribute<?>> attributes, List<Selector<?>> selectors, List<AttributePosition> lookupTable, Query query) {
         this.attributes = attributes;
         this.selectors = Collections.unmodifiableList(selectors);
         this.lookupTable = lookupTable;

@@ -5,14 +5,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class H2QueryBuilder implements QueryBuilder{
 
 
-    public static final Selector<Long> studentId = new SelectorBuilder().addAttribute(Attributes.studentId).addColumn("ID").build();
-    public static final Selector<String> firstName = new SelectorBuilder().addAttribute(Attributes.firstName).addColumn("FIRST_NAME").build();
-    public static final Selector<String> lastName = new SelectorBuilder().addAttribute(Attributes.lastName).addColumn("LAST_NAME").build();
-    public static final Selector<Long> studentClass = new SelectorBuilder().addAttribute(Attributes.studentClass).addColumn("CLASS").build();
+    public static final Selector<Long> studentId = new SelectorBuilder<>(Attributes.studentId).addColumn("ID").build();
+    public static final Selector<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("FIRST_NAME").build();
+    public static final Selector<String> lastName = new SelectorBuilder<>(Attributes.lastName).addColumn("LAST_NAME").build();
+    public static final Selector<Long> studentClass = new SelectorBuilder<>(Attributes.studentClass).addColumn("CLASS").build();
     public static final Selector<String> fullName = new Enrichment<String>(Attributes.fullName) {
         @Override
         public void enrich(IntermediateResult result) {
@@ -27,7 +28,7 @@ public class H2QueryBuilder implements QueryBuilder{
 
     private final Statement statement;
 
-    public H2QueryBuilder(Statement statement) {
+    H2QueryBuilder(Statement statement) {
         this.statement = statement;
     }
 
@@ -40,7 +41,7 @@ public class H2QueryBuilder implements QueryBuilder{
         String select = selectors.stream().flatMap(sel -> {
             Optional<String> column = sel.getColumn();
             if (column.isPresent()) {
-                return Collections.singletonList(column.get()).stream();
+                return Stream.of(column.get());
             } else {
                 final List<String> empty = Collections.emptyList();
                 return empty.stream();
@@ -66,7 +67,7 @@ public class H2QueryBuilder implements QueryBuilder{
         private final String query;
         private final List<Selector<?>> selectors;
 
-        public Query(String query, List<Selector<?>> selectors) {
+        Query(String query, List<Selector<?>> selectors) {
             this.query = query;
             this.selectors = selectors;
         }

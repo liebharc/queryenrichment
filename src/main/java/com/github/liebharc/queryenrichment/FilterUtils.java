@@ -8,13 +8,12 @@ public class FilterUtils {
         final StringBuilder result = new StringBuilder();
         boolean isFirst = true;
         for (SimpleExpression criterion : criteria) {
-            SimpleExpression expression = criterion;
 
             if (!isFirst) {
                 result.append(" and ");
             }
 
-            result.append(expression.toString());
+            result.append(criterion.toString());
             isFirst = false;
         }
 

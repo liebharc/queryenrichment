@@ -7,7 +7,7 @@ public class FromFilterEnrichment<T> extends Enrichment<T> {
 
     private final SimpleExpression expression;
 
-    public FromFilterEnrichment(Attribute attribute, SimpleExpression expression) {
+    public FromFilterEnrichment(Attribute<T> attribute, SimpleExpression expression) {
         super(attribute, NO_COLUMN);
         this.expression = expression;
     }

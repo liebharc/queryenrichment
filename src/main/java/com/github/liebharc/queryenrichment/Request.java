@@ -5,20 +5,20 @@ import java.util.List;
 import java.util.Objects;
 
 public class Request {
-    private final List<Attribute> attributes;
+    private final List<Attribute<?>> attributes;
 
     private final List<SimpleExpression> criteria;
 
-    public Request(List<Attribute> attributes) {
+    public Request(List<Attribute<?>> attributes) {
         this(attributes, Collections.emptyList());
     }
 
-    public Request(List<Attribute> attributes, List<SimpleExpression> criteria) {
+    public Request(List<Attribute<?>> attributes, List<SimpleExpression> criteria) {
         this.attributes = attributes;
         this.criteria = criteria;
     }
 
-    public List<Attribute> getAttributes() {
+    public List<Attribute<?>> getAttributes() {
         return attributes;
     }
 

@@ -35,7 +35,7 @@ public class IntermediateResult {
         this.queryResult = row;
     }
 
-    public void clear() {
+    private void clear() {
         results.clear();
         queryResultPos = 0;
     }
