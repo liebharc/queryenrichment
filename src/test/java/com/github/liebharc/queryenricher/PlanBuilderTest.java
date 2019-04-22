@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -17,6 +18,16 @@ public class PlanBuilderTest {
                         InMemoryQueryBuilder.studentId,
                         InMemoryQueryBuilder.studentId);
         new InMemoryPlanBuilder(selectors);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void multipleDomainsTest() {
+        final List<Selector> selectors =
+                Arrays.asList(
+                        InMemoryQueryBuilder.studentId,
+                        new SelectorBuilder().addAttribute("teacher", "id").addColumn("ID").build());
+        InMemoryPlanBuilder planBuilder = new InMemoryPlanBuilder(selectors);
+        planBuilder.build(selectors.stream().map(sel -> sel.getAttribute()).collect(Collectors.toList()));
     }
 
     @Test

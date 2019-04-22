@@ -26,9 +26,22 @@ public abstract class PlanBuilder {
     }
 
     public Plan build(List<Attribute> attributes) {
+        if (this.hasMultipleDomains(attributes)) {
+            throw new IllegalArgumentException("Can't query for multiple domain in one request");
+        }
+
         List<Selector> selectors = this.findRequiredSelectors(attributes);
         List<Selector> queryColumns = selectors.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
         return new Plan(selectors, this.getBuilder(this.createLookupTable(selectors)).build(queryColumns));
+    }
+
+    private boolean hasMultipleDomains(List<Attribute> attributes) {
+        if (attributes.isEmpty()) {
+            return false;
+        }
+
+        final String domain = attributes.get(0).getDomain();
+        return attributes.stream().anyMatch(attr -> !attr.getDomain().equals(domain));
     }
 
     private List<Selector> findRequiredSelectors(List<Attribute> attributes) {
