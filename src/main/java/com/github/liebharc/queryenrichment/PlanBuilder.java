@@ -106,9 +106,7 @@ public abstract class PlanBuilder {
     }
 
     /**
-     * Indicates whether or not the given expression is an equality expression. Beware that the implementation
-     * is a hack. If this project goes somewhere then we likely want to get rid of the whole Hibernate dependency
-     * and have an own filter expression tree.
+     * Indicates whether or not the given expression is an equality expression.
      */
     private boolean isEqualityExpression(SimpleExpression expr) {
         return expr.getOperation().equals("=");
