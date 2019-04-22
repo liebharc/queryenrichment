@@ -1,23 +1,22 @@
 package com.github.liebharc.queryenricher;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
 public class Selector {
 
-    private final List<Attribute> attributes;
-    private final List<String> columns;
+    private final Attribute attributes;
+    private final String column;
 
-    public Selector(List<Attribute> attributes, List<String> columns) {
-        this.attributes = Collections.unmodifiableList(attributes);
-        this.columns = Collections.unmodifiableList(columns);
+    public Selector(Attribute attribute, String columnOrNull) {
+        this.attributes = attribute;
+        this.column = columnOrNull;
     }
 
-    List<String> getColumns() {
-        return columns;
+    Optional<String> getColumn() {
+        return Optional.ofNullable(column);
     }
 
-    List<Attribute> getAttributes() {
+    Attribute getAttribute() {
         return attributes;
     }
 }

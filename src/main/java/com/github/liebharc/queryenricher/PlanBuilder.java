@@ -12,12 +12,10 @@ public abstract class PlanBuilder {
         final StringBuilder errorBuilder = new StringBuilder(0);
 
         for (Selector selector : selectors) {
-            for (Attribute attribute : selector.getAttributes()) {
-                Selector previousMapping= this.selectors.put(attribute, selector);
+            Selector previousMapping= this.selectors.put(selector.getAttribute(), selector);
 
-                if (previousMapping != null) {
-                    errorBuilder.append(attribute + "  has more than one selector; " + previousMapping + " and " + selector + "\n");
-                }
+            if (previousMapping != null) {
+                errorBuilder.append(selector.getAttribute() + "  has more than one selector; " + previousMapping + " and " + selector + "\n");
             }
         }
 
@@ -29,7 +27,8 @@ public abstract class PlanBuilder {
 
     public Plan build(List<Attribute> attributes) {
         List<Selector> selectors = this.findRequiredSelectors(attributes);
-        return new Plan(selectors, this.getBuilder(this.createLookupTable(selectors)).build(selectors));
+        List<Selector> queryColumns = selectors.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
+        return new Plan(selectors, this.getBuilder(this.createLookupTable(selectors)).build(queryColumns));
     }
 
     private List<Selector> findRequiredSelectors(List<Attribute> attributes) {

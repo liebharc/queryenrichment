@@ -12,9 +12,9 @@ public class InMemoryQueryBuilder implements QueryBuilder {
     public static final Selector firstName = new SelectorBuilder().addAttribute("student", "firstName").addColumn("FIRST_NAME").build();
     public static final Selector lastName = new SelectorBuilder().addAttribute("student", "lastName").addColumn("LAST_NAME").build();
 
-    public static final Attribute studentIdAttr = studentId.getAttributes().get(0);
-    public static final Attribute firstNameAttr = firstName.getAttributes().get(0);
-    public static final Attribute lastNameAttr = lastName.getAttributes().get(0);
+    public static final Attribute studentIdAttr = studentId.getAttribute();
+    public static final Attribute firstNameAttr = firstName.getAttribute();
+    public static final Attribute lastNameAttr = lastName.getAttribute();
 
     private final Map<Selector, Integer> lookupTable;
 
@@ -69,7 +69,7 @@ public class InMemoryQueryBuilder implements QueryBuilder {
                             return (Object)student.getLastName();
                         }
 
-                        return (Object)null;
+                        throw new IllegalArgumentException("Unknown column " + selector);
                     }).collect(Collectors.toList())).collect(Collectors.toList());
             return new QueryResult(lookupTable, selectors, rows);
         }

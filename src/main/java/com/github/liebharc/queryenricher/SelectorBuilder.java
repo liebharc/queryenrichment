@@ -1,27 +1,24 @@
 package com.github.liebharc.queryenricher;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class SelectorBuilder {
-    private final List<Attribute> attributes = new ArrayList<Attribute>();
-    private final List<String> columns = new ArrayList<String>();
+    private Attribute attribute;
+    private String column;
 
     public void addAttribute(Attribute attribute) {
-        attributes.add(attribute);
+        this.attribute = attribute;
     }
 
     public SelectorBuilder addAttribute(String domain, String property) {
-        attributes.add(new Attribute(domain, property));
+        this.attribute = new Attribute(domain, property);
         return this;
     }
 
     public SelectorBuilder addColumn(String column) {
-        columns.add(column);
+        this.column = column;
         return this;
     }
 
     public Selector build() {
-        return new Selector(attributes, columns);
+        return new Selector(attribute, column);
     }
 }
