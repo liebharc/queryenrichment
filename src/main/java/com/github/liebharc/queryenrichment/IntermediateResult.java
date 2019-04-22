@@ -23,9 +23,10 @@ public class IntermediateResult {
     public void addFromQuery(Selector<?> selector) {
         // Plan builder ensures that we can rely on the query result position here
         results.put(selector.getAttribute(), queryResult.get(queryResultPos));
+        this.nextColumn();
     }
 
-    public void nextColumn() {
+    private void nextColumn() {
         queryResultPos++;
     }
 

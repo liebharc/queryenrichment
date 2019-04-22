@@ -2,7 +2,6 @@ package com.github.liebharc.queryenrichment;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class Plan {
     private final List<Attribute> attributes;
@@ -21,7 +20,9 @@ public class Plan {
     public EnrichedQueryResult execute() {
         long start = System.currentTimeMillis();
         try {
-            final QueryResult queryResult = query.query(); final List<List<Object>> rows = queryResult.getRows();
+            final QueryResult queryResult = query.query();
+            statistics.addQueryTime(System.currentTimeMillis() - start);
+            final List<List<Object>> rows = queryResult.getRows();
             final Object[][] results = new Object[rows.size()][];
             final IntermediateResult intermediateResult = new IntermediateResult();
             for (int i = 0; i < rows.size(); i++) {
@@ -30,7 +31,6 @@ public class Plan {
 
                 for (Selector<?> selector : selectors) {
                     selector.enrich(intermediateResult);
-                    intermediateResult.nextColumn();
                 }
 
                 for (AttributePosition attributePosition : lookupTable) {
@@ -43,7 +43,7 @@ public class Plan {
             return new EnrichedQueryResult(attributes, results);
         }
         finally {
-            statistics.add(System.currentTimeMillis() - start);
+            statistics.addTotal(System.currentTimeMillis() - start);
         }
     }
 

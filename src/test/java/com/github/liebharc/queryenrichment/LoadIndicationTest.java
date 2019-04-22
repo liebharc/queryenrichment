@@ -56,7 +56,6 @@ public class LoadIndicationTest {
     }
 
     @Test
-    @Ignore
     public void jdbcTemplateReference() {
         long start = System.currentTimeMillis();
         for (int i = 0; i < ITERATIONS; i++) {
@@ -70,7 +69,8 @@ public class LoadIndicationTest {
     @Test
     public void planIndication() {
         long start = System.currentTimeMillis();
-        final PlanCache planCache = new PlanCache(10, new H2PlanBuilder(statement, Arrays.asList(studentId, firstName, lastName, classId)));
+        final PlanBuilder planBuilder = new H2PlanBuilder(statement, Arrays.asList(studentId, firstName, lastName, classId));
+        final PlanCache planCache = new PlanCache(10, planBuilder);
         for (int i = 0; i < ITERATIONS; i++) {
             final Request request =
                     new Request(Arrays.asList(Attributes.studentId, Attributes.lastName, Attributes.studentClass),
