@@ -28,7 +28,7 @@ public abstract class PlanBuilder {
             throw new IllegalArgumentException("At least one attribute must be requested");
         }
 
-        if (this.getDomain(request.getAttributes())) {
+        if (this.hasMultipleDomains(request.getAttributes())) {
             throw new IllegalArgumentException("Can't query for multiple domain in one request");
         }
 
@@ -45,7 +45,7 @@ public abstract class PlanBuilder {
         return new Plan(request.getAttributes(), selectors, this.createLookupTable(request.getAttributes()), this.getQueryBuilder().build(queryColumns, domain, filters));
     }
 
-    private boolean getDomain(List<Attribute> attributes) {
+    private boolean hasMultipleDomains(List<Attribute> attributes) {
         final String domain = attributes.get(0).getDomain();
         return attributes.stream().anyMatch(attr -> !attr.getDomain().equals(domain));
     }
