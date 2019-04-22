@@ -26,7 +26,7 @@ public class Selector {
         result.addFromQuery(this);
     }
 
-    public List<Class<? extends Selector>> getDependencies() {
+    public List<Attribute> getDependencies() {
         return Collections.emptyList();
     }
 }

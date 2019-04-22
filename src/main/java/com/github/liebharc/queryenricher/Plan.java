@@ -7,10 +7,10 @@ import java.util.Map;
 public class Plan {
     private final List<Attribute> attributes;
     private final List<Selector> selectors;
-    private final Map<Selector, Integer> lookupTable;
+    private final Map<Attribute, Integer> lookupTable;
     private final Query query;
 
-    public Plan(List<Attribute> attributes, List<Selector> selectors, Map<Selector, Integer> lookupTable, Query query) {
+    public Plan(List<Attribute> attributes, List<Selector> selectors, Map<Attribute, Integer> lookupTable, Query query) {
         this.attributes = attributes;
         this.selectors = Collections.unmodifiableList(selectors);
         this.lookupTable = lookupTable;
@@ -31,7 +31,7 @@ public class Plan {
                 intermediateResult.nextColumn();
             }
 
-            for (Map.Entry<Selector, Integer> selection : lookupTable.entrySet()) {
+            for (Map.Entry<Attribute, Integer> selection : lookupTable.entrySet()) {
                 row[selection.getValue()] = intermediateResult.get(selection.getKey());
             }
 

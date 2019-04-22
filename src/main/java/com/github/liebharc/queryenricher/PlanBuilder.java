@@ -86,10 +86,10 @@ public abstract class PlanBuilder {
         return expr.getOperation().equals("=");
     }
 
-    private Map<Selector, Integer> createLookupTable(List<Selector> selectors) {
-        final Map<Selector, Integer> lookup = new HashMap<>();
+    private Map<Attribute, Integer> createLookupTable(List<Selector> selectors) {
+        final Map<Attribute, Integer> lookup = new HashMap<>();
         for (int i = 0; i < selectors.size(); i++) {
-            lookup.put(selectors.get(i), i);
+            lookup.put(selectors.get(i).getAttribute(), i);
         }
 
         return lookup;

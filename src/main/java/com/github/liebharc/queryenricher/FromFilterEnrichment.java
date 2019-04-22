@@ -18,7 +18,7 @@ public class FromFilterEnrichment extends Enrichment {
     }
 
     @Override
-    public List<Class<? extends Selector>> getDependencies() {
+    public List<Attribute> getDependencies() {
         return Collections.emptyList();
     }
 }

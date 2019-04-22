@@ -13,7 +13,7 @@ public abstract class Enrichment extends Selector {
     public abstract void enrich(IntermediateResult result);
 
     @Override
-    public abstract List<Class<? extends Selector>> getDependencies();
+    public abstract List<Attribute> getDependencies();
 
     @Override
     public final Optional<String> getColumn() {

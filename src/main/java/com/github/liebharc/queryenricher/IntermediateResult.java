@@ -11,18 +11,22 @@ public class IntermediateResult {
 
     private int queryResultPos = 0;
 
-    private final Map<Selector, Object> results = new HashMap<>();
+    private final Map<Attribute, Object> results = new HashMap<>();
 
     public void add(Selector selector, Object result) {
-        results.put(selector, result);
+        results.put(selector.getAttribute(), result);
     }
 
     public Object get(Selector selector) {
-        return results.get(selector);
+        return results.get(selector.getAttribute());
+    }
+
+    public Object get(Attribute attribute) {
+        return results.get(attribute);
     }
 
     public void addFromQuery(Selector selector) {
-        results.put(selector, queryResult.get(queryResultPos));
+        results.put(selector.getAttribute(), queryResult.get(queryResultPos));
     }
 
     public void nextColumn() {
