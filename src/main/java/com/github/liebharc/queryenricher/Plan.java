@@ -18,7 +18,7 @@ public class Plan {
     }
 
     public EnrichedQueryResult execute() {
-        final QueryResult queryResult = this.getQuery().query();
+        final QueryResult queryResult = query.query();
         final List<List<Object>> rows = queryResult.getRows();
         final Object[][] results = new Object[rows.size()][];
         final IntermediateResult intermediateResult = new IntermediateResult();
@@ -43,9 +43,5 @@ public class Plan {
 
     List<Selector> getSelectors() {
         return selectors;
-    }
-
-    Query getQuery() {
-        return query;
     }
 }

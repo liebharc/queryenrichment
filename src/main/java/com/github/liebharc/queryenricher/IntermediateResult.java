@@ -17,15 +17,12 @@ public class IntermediateResult {
         results.put(selector.getAttribute(), result);
     }
 
-    public Object get(Selector selector) {
-        return results.get(selector.getAttribute());
-    }
-
     public Object get(Attribute attribute) {
         return results.get(attribute);
     }
 
     public void addFromQuery(Selector selector) {
+        // Plan builder ensures that we can rely on the query result position here
         results.put(selector.getAttribute(), queryResult.get(queryResultPos));
     }
 

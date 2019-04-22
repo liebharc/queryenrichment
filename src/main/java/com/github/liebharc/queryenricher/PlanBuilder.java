@@ -34,14 +34,13 @@ public abstract class PlanBuilder {
 
         String domain = request.getAttributes().get(0).getDomain();
 
+        // IntermediateResult requires that all selectors which require a filter are first in the list, the order method
+        // ensures that this holds true
         final List<Selector> selectors =
                 this.orderSelectorsByDependencies(
                         this.addDependencies(
                             this.findRequiredSelectors(request)));
         final List<SimpleExpression> filters = this.translatePropertyNames(domain, request.getCriteria());
-
-        // The next steps requires that all selectors which require a filter are first in the list, the order method
-        // ensures that this holds true
         final List<Selector> queryColumns = selectors.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
         return new Plan(request.getAttributes(), selectors, this.createLookupTable(request.getAttributes()), this.getQueryBuilder().build(filters, queryColumns));
     }

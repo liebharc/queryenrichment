@@ -8,7 +8,7 @@ public class FromFilterEnrichment extends Enrichment {
     private final SimpleExpression expression;
 
     public FromFilterEnrichment(Attribute attribute, SimpleExpression expression) {
-        super(attribute, null);
+        super(attribute, NO_COLUMN);
         this.expression = expression;
     }
 

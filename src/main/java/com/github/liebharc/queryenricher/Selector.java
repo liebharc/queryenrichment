@@ -6,6 +6,8 @@ import java.util.Optional;
 
 public class Selector {
 
+    public static final String NO_COLUMN = null;
+
     private final Attribute attributes;
     private final String column;
 

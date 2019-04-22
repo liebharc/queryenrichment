@@ -10,7 +10,7 @@ public class QueryResult {
         this.rows = rows;
     }
 
-    List<List<Object>> getRows() {
+    public List<List<Object>> getRows() {
         return rows;
     }
 }
