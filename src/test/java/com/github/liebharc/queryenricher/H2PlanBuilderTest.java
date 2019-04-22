@@ -1,14 +1,10 @@
 package com.github.liebharc.queryenricher;
 
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.SimpleExpression;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +16,7 @@ public class H2PlanBuilderTest {
     private Statement statement;
 
     @Before
-    public void setupH2() throws Exception {
+    public void setupH2() throws SQLException {
         connection = DriverManager.
                 getConnection("jdbc:h2:mem:test", "sa", "");
         statement = connection.createStatement();
@@ -31,14 +27,17 @@ public class H2PlanBuilderTest {
         statement.execute("INSERT INTO STUDENT(id, first_name, last_name, class) VALUES (11, 'Matt', 'Smith', 1)");
     }
 
+    @After
+    public void disposeH2() throws SQLException {
+        statement.execute("DROP TABLE CLASS");
+        statement.execute("DROP TABLE STUDENT");
+        statement.close();
+        connection.close();
+    }
+
     @Test
     public void queryTest() {
-        final List<Selector> selectors =
-                Arrays.asList(
-                        H2QueryBuilder.studentId,
-                        H2QueryBuilder.firstName,
-                        H2QueryBuilder.lastName);
-
+        final List<Selector> selectors = this.createDefaultSeletors();
         final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
 
         final Plan plan = planBuilder.build(
@@ -47,12 +46,7 @@ public class H2PlanBuilderTest {
                                 InMemoryQueryBuilder.lastNameAttr,
                                 InMemoryQueryBuilder.firstNameAttr)));
 
-        final QueryResult queryResult = plan.getQuery().query();
-        final String stringResult =
-                queryResult.getRows().stream()
-                        .map(row -> row.stream()
-                            .map(cell -> cell.toString()).collect(Collectors.joining(",")))
-                        .collect(Collectors.joining("\n"));
+        final String stringResult = this.queryToString(plan);
         Assert.assertEquals(
                 "10,Tenant,David\n" +
                 "11,Smith,Matt", stringResult);
@@ -60,15 +54,10 @@ public class H2PlanBuilderTest {
 
     @Test
     public void withCriteriaTest() {
-        final List<Selector> selectors =
-                Arrays.asList(
-                        H2QueryBuilder.studentId,
-                        H2QueryBuilder.firstName,
-                        H2QueryBuilder.lastName);
-
+        final List<Selector> selectors = this.createDefaultSeletors();
         final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
 
-        final SimpleExpression criterion = Restrictions.eq("id", 10);
+        final SimpleExpression criterion = SimpleExpression.neq("id", 11);
         final Plan plan = planBuilder.build(
                 new Request(
                         Arrays.asList(InMemoryQueryBuilder.studentIdAttr,
@@ -76,13 +65,41 @@ public class H2PlanBuilderTest {
                                 InMemoryQueryBuilder.firstNameAttr),
                         Arrays.asList(criterion)));
 
-        final QueryResult queryResult = plan.getQuery().query();
-        final String stringResult =
-                queryResult.getRows().stream()
-                        .map(row -> row.stream()
-                                .map(cell -> cell.toString()).collect(Collectors.joining(",")))
-                        .collect(Collectors.joining("\n"));
+        final String stringResult = this.queryToString(plan);
         Assert.assertEquals(
                 "10,Tenant,David", stringResult);
+    }
+
+    @Test
+    public void replaceSelectorByFilterTest() {
+        final List<Selector> selectors = this.createDefaultSeletors();final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+
+        final SimpleExpression criterion = SimpleExpression.eq("firstName", "David");
+        final Plan plan = planBuilder.build(
+                new Request(
+                        Arrays.asList(InMemoryQueryBuilder.studentIdAttr,
+                                InMemoryQueryBuilder.lastNameAttr,
+                                InMemoryQueryBuilder.firstNameAttr),
+                        Arrays.asList(criterion)));
+
+        Assert.assertEquals(2, plan.getSelectors().stream().filter(sel -> !(sel instanceof FromFilterEnrichment)).count());
+        final String stringResult = this.queryToString(plan);
+        Assert.assertEquals(
+                "10,Tenant", stringResult);
+    }
+
+    private String queryToString(Plan plan) {
+        final QueryResult queryResult = plan.getQuery().query();
+        return queryResult.getRows().stream()
+                .map(row -> row.stream()
+                        .map(cell -> cell.toString()).collect(Collectors.joining(",")))
+                .collect(Collectors.joining("\n"));
+    }
+
+    private List<Selector> createDefaultSeletors() {
+        return Arrays.asList(
+                H2QueryBuilder.studentId,
+                H2QueryBuilder.firstName,
+                H2QueryBuilder.lastName);
     }
 }

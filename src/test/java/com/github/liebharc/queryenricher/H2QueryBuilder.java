@@ -24,7 +24,7 @@ public class H2QueryBuilder implements QueryBuilder{
     }
 
     @Override
-    public com.github.liebharc.queryenricher.Query build(Request request, List<Selector> selectors) {
+    public com.github.liebharc.queryenricher.Query build(List<SimpleExpression> filters, List<Selector> selectors) {
         if (selectors.isEmpty()) {
             return ReturnNothingQuery.INSTANCE;
         }
@@ -47,9 +47,9 @@ public class H2QueryBuilder implements QueryBuilder{
         query.append(" FROM ");
         query.append(domain);
 
-        if (!request.getCriteria().isEmpty()) {
+        if (!filters.isEmpty()) {
             query.append(" WHERE ");
-            query.append(request.getSqlCriteria());
+            query.append(FilterUtils.getSqlCriteria(filters));
         }
 
         return new Query(query.toString(), selectors);

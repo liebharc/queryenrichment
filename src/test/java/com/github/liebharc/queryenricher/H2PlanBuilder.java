@@ -14,7 +14,7 @@ public class H2PlanBuilder extends PlanBuilder {
     }
 
     @Override
-    protected QueryBuilder getQueryBuilder(Request request, Map<Selector, Integer> lookupTable) {
+    protected QueryBuilder getQueryBuilder(Map<Selector, Integer> lookupTable) {
         return new H2QueryBuilder(lookupTable, statement);
     }
 }
