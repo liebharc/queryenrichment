@@ -63,7 +63,7 @@ public class LoadIndicationTest {
             Assert.assertEquals(RESULT_SIZE, students.size());
         }
 
-        System.out.print("Duration [ms]: " + (System.currentTimeMillis() - start));
+        System.out.println("Duration [ms]: " + (System.currentTimeMillis() - start));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class LoadIndicationTest {
             Assert.assertEquals(RESULT_SIZE, result.getResults().length);
         }
 
-        System.out.print("Duration [ms]: " + (System.currentTimeMillis() - start));
+        System.out.println("Duration [ms]: " + (System.currentTimeMillis() - start));
     }
 
     // Getters/setters are required by JDBC template
