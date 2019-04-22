@@ -1,9 +1,6 @@
 package com.github.liebharc.queryenricher;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class PlanBuilder {
@@ -37,10 +34,16 @@ public abstract class PlanBuilder {
 
         String domain = request.getAttributes().get(0).getDomain();
 
-        List<Selector> selectors = this.findRequiredSelectors(request);
-        List<SimpleExpression> filters = this.translatePropertyNames(domain, request.getCriteria());
-        List<Selector> queryColumns = selectors.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
-        return new Plan(request.getAttributes(), selectors, this.createLookupTable(selectors), this.getQueryBuilder().build(filters, queryColumns));
+        final List<Selector> selectors =
+                this.orderSelectorsByDependencies(
+                        this.addDependencies(
+                            this.findRequiredSelectors(request)));
+        final List<SimpleExpression> filters = this.translatePropertyNames(domain, request.getCriteria());
+
+        // The next steps requires that all selectors which require a filter are first in the list, the order method
+        // ensures that this holds true
+        final List<Selector> queryColumns = selectors.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
+        return new Plan(request.getAttributes(), selectors, this.createLookupTable(request.getAttributes()), this.getQueryBuilder().build(filters, queryColumns));
     }
 
     private boolean getDomain(List<Attribute> attributes) {
@@ -62,6 +65,34 @@ public abstract class PlanBuilder {
                 return attributeToSelector.get(attr);
             }
         }).collect(Collectors.toList());
+    }
+
+
+    private List<Selector> addDependencies(List<Selector> requiredSelectors) {
+        final List<Selector> result = new ArrayList<>();
+        for (Selector selector : requiredSelectors) {
+            this.addDependency(result, selector);
+        }
+
+        return result;
+    }
+
+    private void addDependency(List<Selector> result, Selector item) {
+        if (result.contains(item)) {
+            return;
+        }
+
+        result.add(item);
+
+        for (Attribute dependency : item.getDependencies()) {
+            this.addDependency(result, attributeToSelector.get(dependency));
+        }
+    }
+
+    private List<Selector> orderSelectorsByDependencies(List<Selector> selectors) {
+        Map<Boolean, List<Selector>> directColumns
+                = selectors.stream().collect(Collectors.partitioningBy(sel -> sel.getColumn().isPresent()));
+        return TopologicalSort.INSTANCE.sort(directColumns.get(false), directColumns.get(true), attributeToSelector);
     }
 
     private List<SimpleExpression> translatePropertyNames(String domain, List<SimpleExpression> criteria) {
@@ -86,10 +117,10 @@ public abstract class PlanBuilder {
         return expr.getOperation().equals("=");
     }
 
-    private Map<Attribute, Integer> createLookupTable(List<Selector> selectors) {
+    private Map<Attribute, Integer> createLookupTable(List<Attribute> attributes) {
         final Map<Attribute, Integer> lookup = new HashMap<>();
-        for (int i = 0; i < selectors.size(); i++) {
-            lookup.put(selectors.get(i).getAttribute(), i);
+        for (int i = 0; i < attributes.size(); i++) {
+            lookup.put(attributes.get(i), i);
         }
 
         return lookup;

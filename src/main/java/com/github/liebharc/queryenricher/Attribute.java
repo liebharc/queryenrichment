@@ -33,4 +33,12 @@ public class Attribute {
     public int hashCode() {
         return Objects.hash(domain, property);
     }
+
+    @Override
+    public String toString() {
+        return "Attribute{" +
+                "domain='" + domain + '\'' +
+                ", property='" + property + '\'' +
+                '}';
+    }
 }

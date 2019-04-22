@@ -18,9 +18,9 @@ public class Plan {
     }
 
     public EnrichedQueryResult execute() {
-        QueryResult queryResult = this.getQuery().query();
-        List<List<Object>> rows = queryResult.getRows();
-        Object[][] results = new Object[rows.size()][];
+        final QueryResult queryResult = this.getQuery().query();
+        final List<List<Object>> rows = queryResult.getRows();
+        final Object[][] results = new Object[rows.size()][];
         final IntermediateResult intermediateResult = new IntermediateResult();
         for (int i = 0; i < rows.size(); i++) {
             Object[] row = new Object[attributes.size()];
@@ -31,8 +31,8 @@ public class Plan {
                 intermediateResult.nextColumn();
             }
 
-            for (Map.Entry<Attribute, Integer> selection : lookupTable.entrySet()) {
-                row[selection.getValue()] = intermediateResult.get(selection.getKey());
+            for (Attribute attribute : attributes) {
+                row[lookupTable.get(attribute)] = intermediateResult.get(attribute);
             }
 
             results[i] = row;

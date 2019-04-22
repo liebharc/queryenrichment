@@ -46,7 +46,7 @@ public class H2PlanBuilderTest {
                                 H2QueryBuilder.lastNameAttr,
                                 H2QueryBuilder.firstNameAttr)));
 
-        final String stringResult = this.queryToString(plan);
+        final String stringResult = this.resultToString(plan.execute());
         Assert.assertEquals(
                 "10,Tenant,David\n" +
                 "11,Smith,Matt", stringResult);
@@ -65,7 +65,7 @@ public class H2PlanBuilderTest {
                                 H2QueryBuilder.firstNameAttr),
                         Arrays.asList(criterion)));
 
-        final String stringResult = this.queryToString(plan);
+        final String stringResult = this.resultToString(plan.execute());
         Assert.assertEquals(
                 "10,Tenant,David", stringResult);
     }
@@ -84,9 +84,9 @@ public class H2PlanBuilderTest {
                         Arrays.asList(criterion)));
 
         Assert.assertEquals(2, plan.getSelectors().stream().filter(sel -> !(sel instanceof FromFilterEnrichment)).count());
-        final String stringResult = this.queryToString(plan);
+        final String stringResult = this.resultToString(plan.execute());
         Assert.assertEquals(
-                "10,Tenant", stringResult);
+                "10,Tenant,David", stringResult);
     }
 
     @Test
@@ -124,7 +124,6 @@ public class H2PlanBuilderTest {
     }
 
     @Test
-    @Ignore
     public void enrichmentWithAutomaticDependencyResolutionTest() {
         final List<Selector> selectors = this.createDefaultSeletors();
         final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
@@ -136,15 +135,7 @@ public class H2PlanBuilderTest {
         EnrichedQueryResult result = plan.execute();
         Assert.assertEquals(
                 "10,David Tenant\n" +
-                         "11, Matt Smith", this.resultToString(result));
-    }
-
-    private String queryToString(Plan plan) {
-        final QueryResult queryResult = plan.getQuery().query();
-        return queryResult.getRows().stream()
-                .map(row -> row.stream()
-                        .map(cell -> cell.toString()).collect(Collectors.joining(",")))
-                .collect(Collectors.joining("\n"));
+                         "11,Matt Smith", this.resultToString(result));
     }
 
     private String resultToString(EnrichedQueryResult result) {

@@ -29,4 +29,11 @@ public class Selector {
     public List<Attribute> getDependencies() {
         return Collections.emptyList();
     }
+
+    @Override
+    public String toString() {
+        return "Selector{" +
+                "attributes=" + attributes +
+                '}';
+    }
 }
