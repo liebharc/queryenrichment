@@ -10,9 +10,9 @@ public class TopologicalSort {
 
     }
 
-    public List<Selector<?>> sort(Collection<Selector<?>> source, Collection<Selector<?>> visited, Map<Attribute, Selector<?>> attributeToSelector) {
-        final List<Selector<?>> sorted = new ArrayList<>(visited);
-        final Set<Selector<?>> visitedSet = new HashSet<>(visited);
+    public List<Selector<?>> sort(Collection<Selector<?>> source, Map<Attribute, Selector<?>> attributeToSelector) {
+        final List<Selector<?>> sorted = new ArrayList<>();
+        final Set<Selector<?>> visitedSet = new HashSet<>();
 
         for (Selector<?> item : source) {
             this.visit(item, visitedSet, sorted, attributeToSelector);

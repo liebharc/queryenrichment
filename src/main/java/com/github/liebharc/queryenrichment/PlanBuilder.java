@@ -92,9 +92,7 @@ public abstract class PlanBuilder {
     }
 
     private List<Selector<?>> orderSelectorsByDependencies(List<Selector<?>> selectors) {
-        Map<Boolean, List<Selector<?>>> directColumns
-                = selectors.stream().collect(Collectors.partitioningBy(sel -> sel.getColumn().isPresent()));
-        return TopologicalSort.INSTANCE.sort(directColumns.get(false), directColumns.get(true), attributeToSelector);
+        return TopologicalSort.INSTANCE.sort(selectors, attributeToSelector);
     }
 
     private List<SimpleExpression> translatePropertyNames(String domain, List<SimpleExpression> criteria) {
