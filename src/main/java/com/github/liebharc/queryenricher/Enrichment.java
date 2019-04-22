@@ -5,6 +5,10 @@ import java.util.Optional;
 
 public abstract class Enrichment extends Selector {
 
+    public Enrichment(Attribute attribute) {
+        this(attribute, null);
+    }
+
     public Enrichment(Attribute attribute, String columnOrNull) {
         super(attribute, columnOrNull);
     }

@@ -24,7 +24,7 @@ public class Plan {
         final IntermediateResult intermediateResult = new IntermediateResult();
         for (int i = 0; i < rows.size(); i++) {
             Object[] row = new Object[attributes.size()];
-            intermediateResult.nextRow(rows.get(0));
+            intermediateResult.nextRow(rows.get(i));
 
             for (Selector selector : selectors) {
                 selector.enrich(intermediateResult);

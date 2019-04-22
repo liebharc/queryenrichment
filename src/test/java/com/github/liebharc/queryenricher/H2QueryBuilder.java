@@ -12,6 +12,26 @@ public class H2QueryBuilder implements QueryBuilder{
     public static final Selector studentId = new SelectorBuilder().addAttribute("student", "id").addColumn("ID").build();
     public static final Selector firstName = new SelectorBuilder().addAttribute("student", "firstName").addColumn("FIRST_NAME").build();
     public static final Selector lastName = new SelectorBuilder().addAttribute("student", "lastName").addColumn("LAST_NAME").build();
+
+    public static final Attribute studentIdAttr = studentId.getAttribute();
+    public static final Attribute firstNameAttr = firstName.getAttribute();
+    public static final Attribute lastNameAttr = lastName.getAttribute();
+
+    public static final Selector fullName = new Enrichment(new Attribute("student", "fullName")) {
+        @Override
+        public void enrich(IntermediateResult result) {
+            result.add(this, result.get(firstName.getAttribute()) + " " + result.get(lastName.getAttribute()));
+        }
+
+        @Override
+        public List<Attribute> getDependencies() {
+            return Arrays.asList(firstName.getAttribute(), lastName.getAttribute());
+        }
+    };
+
+
+    public static final Attribute fullNameAttr = fullName.getAttribute();
+
     public static final Selector studentClass = new SelectorBuilder().addAttribute("student", "class").addColumn("CLASS").build();
 
     private final Statement statement;

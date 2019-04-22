@@ -42,9 +42,9 @@ public class H2PlanBuilderTest {
 
         final Plan plan = planBuilder.build(
                 new Request(
-                        Arrays.asList(InMemoryQueryBuilder.studentIdAttr,
-                                InMemoryQueryBuilder.lastNameAttr,
-                                InMemoryQueryBuilder.firstNameAttr)));
+                        Arrays.asList(H2QueryBuilder.studentIdAttr,
+                                H2QueryBuilder.lastNameAttr,
+                                H2QueryBuilder.firstNameAttr)));
 
         final String stringResult = this.queryToString(plan);
         Assert.assertEquals(
@@ -60,9 +60,9 @@ public class H2PlanBuilderTest {
         final SimpleExpression criterion = SimpleExpression.neq("id", 11);
         final Plan plan = planBuilder.build(
                 new Request(
-                        Arrays.asList(InMemoryQueryBuilder.studentIdAttr,
-                                InMemoryQueryBuilder.lastNameAttr,
-                                InMemoryQueryBuilder.firstNameAttr),
+                        Arrays.asList(H2QueryBuilder.studentIdAttr,
+                                H2QueryBuilder.lastNameAttr,
+                                H2QueryBuilder.firstNameAttr),
                         Arrays.asList(criterion)));
 
         final String stringResult = this.queryToString(plan);
@@ -72,14 +72,15 @@ public class H2PlanBuilderTest {
 
     @Test
     public void replaceSelectorByFilterTest() {
-        final List<Selector> selectors = this.createDefaultSeletors();final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+        final List<Selector> selectors = this.createDefaultSeletors();
+        final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
 
         final SimpleExpression criterion = SimpleExpression.eq("firstName", "David");
         final Plan plan = planBuilder.build(
                 new Request(
-                        Arrays.asList(InMemoryQueryBuilder.studentIdAttr,
-                                InMemoryQueryBuilder.lastNameAttr,
-                                InMemoryQueryBuilder.firstNameAttr),
+                        Arrays.asList(H2QueryBuilder.studentIdAttr,
+                                H2QueryBuilder.lastNameAttr,
+                                H2QueryBuilder.firstNameAttr),
                         Arrays.asList(criterion)));
 
         Assert.assertEquals(2, plan.getSelectors().stream().filter(sel -> !(sel instanceof FromFilterEnrichment)).count());
@@ -90,18 +91,52 @@ public class H2PlanBuilderTest {
 
     @Test
     public void executeSimpleQueryTest() {
-        final List<Selector> selectors = this.createDefaultSeletors();final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+        final List<Selector> selectors = this.createDefaultSeletors();
+        final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
 
         final SimpleExpression criterion = SimpleExpression.eq("firstName", "David");
         final Plan plan = planBuilder.build(
                 new Request(
-                        Arrays.asList(InMemoryQueryBuilder.studentIdAttr,
-                                InMemoryQueryBuilder.lastNameAttr,
-                                InMemoryQueryBuilder.firstNameAttr),
+                        Arrays.asList(H2QueryBuilder.studentIdAttr,
+                                H2QueryBuilder.lastNameAttr,
+                                H2QueryBuilder.firstNameAttr),
                         Arrays.asList(criterion)));
         EnrichedQueryResult result = plan.execute();
         Assert.assertEquals(
                 "10,Tenant,David", this.resultToString(result));
+    }
+
+    @Test
+    public void enrichmentWithManualDependencyResolutionTest() {
+        final List<Selector> selectors = this.createDefaultSeletors();
+        final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+
+        final Plan plan = planBuilder.build(
+                new Request(
+                        Arrays.asList(H2QueryBuilder.studentIdAttr,
+                                H2QueryBuilder.firstNameAttr,
+                                H2QueryBuilder.lastNameAttr,
+                                H2QueryBuilder.fullNameAttr)));
+        EnrichedQueryResult result = plan.execute();
+        Assert.assertEquals(
+                "10,David,Tenant,David Tenant\n" +
+                         "11,Matt,Smith,Matt Smith", this.resultToString(result));
+    }
+
+    @Test
+    @Ignore
+    public void enrichmentWithAutomaticDependencyResolutionTest() {
+        final List<Selector> selectors = this.createDefaultSeletors();
+        final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+
+        final Plan plan = planBuilder.build(
+                new Request(
+                        Arrays.asList(H2QueryBuilder.studentIdAttr,
+                                H2QueryBuilder.fullNameAttr)));
+        EnrichedQueryResult result = plan.execute();
+        Assert.assertEquals(
+                "10,David Tenant\n" +
+                         "11, Matt Smith", this.resultToString(result));
     }
 
     private String queryToString(Plan plan) {
@@ -123,6 +158,7 @@ public class H2PlanBuilderTest {
         return Arrays.asList(
                 H2QueryBuilder.studentId,
                 H2QueryBuilder.firstName,
-                H2QueryBuilder.lastName);
+                H2QueryBuilder.lastName,
+                H2QueryBuilder.fullName);
     }
 }
