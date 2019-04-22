@@ -13,11 +13,11 @@ public class Selector {
         this.columns = Collections.unmodifiableList(columns);
     }
 
-    public List<String> getColumns() {
+    List<String> getColumns() {
         return columns;
     }
 
-    public List<Attribute> getAttributes() {
+    List<Attribute> getAttributes() {
         return attributes;
     }
 }

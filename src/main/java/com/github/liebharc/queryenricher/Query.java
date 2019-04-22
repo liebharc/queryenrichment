@@ -1,4 +1,8 @@
 package com.github.liebharc.queryenricher;
 
-public class Query {
+import java.util.Collection;
+
+public interface Query {
+
+    QueryResult query();
 }

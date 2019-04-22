@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class PlanBuilder {
+public abstract class PlanBuilder {
     private final Map<Attribute, Selector> selectors = new HashMap<Attribute, Selector>();
 
     public PlanBuilder(List<Selector> selectors) {
@@ -28,10 +28,22 @@ public class PlanBuilder {
     }
 
     public Plan build(List<Attribute> attributes) {
-        return new Plan(this.findRequiredSelectors(attributes));
+        List<Selector> selectors = this.findRequiredSelectors(attributes);
+        return new Plan(selectors, this.getBuilder(this.createLookupTable(selectors)).build(selectors));
     }
 
     private List<Selector> findRequiredSelectors(List<Attribute> attributes) {
         return attributes.stream().map(attr -> selectors.get(attr)).collect(Collectors.toList());
     }
+
+    private Map<Selector, Integer> createLookupTable(List<Selector> selectors) {
+        final Map<Selector, Integer> lookup = new HashMap<>();
+        for (int i = 0; i < selectors.size(); i++) {
+            lookup.put(selectors.get(i), i);
+        }
+
+        return lookup;
+    }
+
+    protected abstract QueryBuilder getBuilder(Map<Selector, Integer> lookupTable);
 }
