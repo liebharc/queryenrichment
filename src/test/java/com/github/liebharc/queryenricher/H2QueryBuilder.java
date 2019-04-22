@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class H2QueryBuilder implements QueryBuilder{
 
@@ -41,12 +40,10 @@ public class H2QueryBuilder implements QueryBuilder{
     }
 
     @Override
-    public com.github.liebharc.queryenricher.Query build(List<SimpleExpression> filters, List<Selector> selectors) {
+    public com.github.liebharc.queryenricher.Query build(List<Selector> selectors, String domain, List<SimpleExpression> filters) {
         if (selectors.isEmpty()) {
             throw  new IllegalArgumentException("At least one attribute must be selected");
         }
-
-        String domain = selectors.get(0).getAttribute().getDomain();
 
         String select = selectors.stream().flatMap(sel -> {
             Optional<String> column = sel.getColumn();

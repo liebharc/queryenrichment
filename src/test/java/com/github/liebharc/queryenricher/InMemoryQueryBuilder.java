@@ -20,7 +20,7 @@ public class InMemoryQueryBuilder implements QueryBuilder {
     }
 
     @Override
-    public com.github.liebharc.queryenricher.Query build(List<SimpleExpression> filters, List<Selector> selectors) {
+    public com.github.liebharc.queryenricher.Query build(List<Selector> selectors, String domain, List<SimpleExpression> filters) {
         if (!filters.isEmpty()) {
             throw new IllegalArgumentException("This class doesn't support criteria");
         }
