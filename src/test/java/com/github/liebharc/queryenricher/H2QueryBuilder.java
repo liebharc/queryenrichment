@@ -43,7 +43,7 @@ public class H2QueryBuilder implements QueryBuilder{
     @Override
     public com.github.liebharc.queryenricher.Query build(List<SimpleExpression> filters, List<Selector> selectors) {
         if (selectors.isEmpty()) {
-            return ReturnNothingQuery.INSTANCE;
+            throw  new IllegalArgumentException("At least one attribute must be selected");
         }
 
         String domain = selectors.get(0).getAttribute().getDomain();
