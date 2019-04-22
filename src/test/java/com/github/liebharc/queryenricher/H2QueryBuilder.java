@@ -14,12 +14,9 @@ public class H2QueryBuilder implements QueryBuilder{
     public static final Selector lastName = new SelectorBuilder().addAttribute("student", "lastName").addColumn("LAST_NAME").build();
     public static final Selector studentClass = new SelectorBuilder().addAttribute("student", "class").addColumn("CLASS").build();
 
-    private final Map<Selector, Integer> lookupTable;
     private final Statement statement;
 
-    public H2QueryBuilder(Map<Selector, Integer> lookupTable, Statement statement) {
-        this.lookupTable = lookupTable;
-
+    public H2QueryBuilder(Statement statement) {
         this.statement = statement;
     }
 
@@ -80,7 +77,7 @@ public class H2QueryBuilder implements QueryBuilder{
                     results.add(row);
                 }
 
-                return new QueryResult(lookupTable, selectors, results);
+                return new QueryResult(results);
 
             } catch (SQLException e) {
                 throw new RuntimeException(e);

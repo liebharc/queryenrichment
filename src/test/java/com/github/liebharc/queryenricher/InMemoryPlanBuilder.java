@@ -10,7 +10,7 @@ public class InMemoryPlanBuilder extends PlanBuilder {
     }
 
     @Override
-    protected QueryBuilder getQueryBuilder(Map<Selector, Integer> lookupTable) {
-        return new InMemoryQueryBuilder(lookupTable);
+    protected QueryBuilder getQueryBuilder() {
+        return new InMemoryQueryBuilder();
     }
 }

@@ -16,11 +16,7 @@ public class InMemoryQueryBuilder implements QueryBuilder {
     public static final Attribute firstNameAttr = firstName.getAttribute();
     public static final Attribute lastNameAttr = lastName.getAttribute();
 
-    private final Map<Selector, Integer> lookupTable;
-
-    public InMemoryQueryBuilder(Map<Selector, Integer> lookupTable) {
-
-        this.lookupTable = lookupTable;
+    public InMemoryQueryBuilder() {
     }
 
     @Override
@@ -75,7 +71,7 @@ public class InMemoryQueryBuilder implements QueryBuilder {
 
                         throw new IllegalArgumentException("Unknown column " + selector);
                     }).collect(Collectors.toList())).collect(Collectors.toList());
-            return new QueryResult(lookupTable, selectors, rows);
+            return new QueryResult(rows);
         }
     }
 }

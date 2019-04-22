@@ -88,10 +88,33 @@ public class H2PlanBuilderTest {
                 "10,Tenant", stringResult);
     }
 
+    @Test
+    public void executeSimpleQueryTest() {
+        final List<Selector> selectors = this.createDefaultSeletors();final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+
+        final SimpleExpression criterion = SimpleExpression.eq("firstName", "David");
+        final Plan plan = planBuilder.build(
+                new Request(
+                        Arrays.asList(InMemoryQueryBuilder.studentIdAttr,
+                                InMemoryQueryBuilder.lastNameAttr,
+                                InMemoryQueryBuilder.firstNameAttr),
+                        Arrays.asList(criterion)));
+        EnrichedQueryResult result = plan.execute();
+        Assert.assertEquals(
+                "10,Tenant,David", this.resultToString(result));
+    }
+
     private String queryToString(Plan plan) {
         final QueryResult queryResult = plan.getQuery().query();
         return queryResult.getRows().stream()
                 .map(row -> row.stream()
+                        .map(cell -> cell.toString()).collect(Collectors.joining(",")))
+                .collect(Collectors.joining("\n"));
+    }
+
+    private String resultToString(EnrichedQueryResult result) {
+        return Arrays.stream(result.getResults())
+                .map(row -> Arrays.stream(row)
                         .map(cell -> cell.toString()).collect(Collectors.joining(",")))
                 .collect(Collectors.joining("\n"));
     }

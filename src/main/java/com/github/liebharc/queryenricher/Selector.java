@@ -1,5 +1,7 @@
 package com.github.liebharc.queryenricher;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class Selector {
@@ -12,11 +14,19 @@ public class Selector {
         this.column = columnOrNull;
     }
 
-    Optional<String> getColumn() {
+    public Optional<String> getColumn() {
         return Optional.ofNullable(column);
     }
 
-    Attribute getAttribute() {
+    public Attribute getAttribute() {
         return attributes;
+    }
+
+    public void enrich(IntermediateResult result) {
+        result.addFromQuery(this);
+    }
+
+    public List<Class<? extends Selector>> getDependencies() {
+        return Collections.emptyList();
     }
 }

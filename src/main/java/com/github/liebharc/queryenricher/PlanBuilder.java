@@ -40,7 +40,7 @@ public abstract class PlanBuilder {
         List<Selector> selectors = this.findRequiredSelectors(request);
         List<SimpleExpression> filters = this.translatePropertyNames(domain, request.getCriteria());
         List<Selector> queryColumns = selectors.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
-        return new Plan(selectors, this.getQueryBuilder(this.createLookupTable(selectors)).build(filters, queryColumns));
+        return new Plan(request.getAttributes(), selectors, this.createLookupTable(selectors), this.getQueryBuilder().build(filters, queryColumns));
     }
 
     private boolean getDomain(List<Attribute> attributes) {
@@ -95,5 +95,5 @@ public abstract class PlanBuilder {
         return lookup;
     }
 
-    protected abstract QueryBuilder getQueryBuilder(Map<Selector, Integer> lookupTable);
+    protected abstract QueryBuilder getQueryBuilder();
 }

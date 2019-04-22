@@ -69,24 +69,4 @@ public class InMemoryPlanBuilderTest {
         final Plan plan2 = planCache.getOrBuildPlan(request);
         Assert.assertSame(plan1, plan2);
     }
-
-    @Test
-    public void queryColumnsTest() {
-        final List<Selector> selectors =
-                Arrays.asList(
-                        InMemoryQueryBuilder.studentId,
-                        InMemoryQueryBuilder.firstName,
-                        InMemoryQueryBuilder.lastName);
-
-        final PlanBuilder planBuilder = new InMemoryPlanBuilder(selectors);
-        InMemoryQueryBuilder.database.setup(
-                new Student(10, "David", "Tenant"),
-                new Student(11, "Matt", "Smith"));
-        Plan plan = planBuilder.build(
-                new Request(
-                    Arrays.asList(
-                        InMemoryQueryBuilder.lastNameAttr,
-                        InMemoryQueryBuilder.firstNameAttr)));
-        QueryResult result = plan.getQuery().query();
-    }
 }
