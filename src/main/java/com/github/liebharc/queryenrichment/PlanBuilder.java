@@ -36,7 +36,7 @@ public abstract class PlanBuilder {
         }
 
         final String domain = request.getAttributes().get(0).getDomain();
-        
+
         final Map<Boolean, List<SimpleExpression>> groupedByQueryFilter = this.groupByQueryFilter(request.getCriteria());
         final List<Step<?>> filterSteps =
                 this.addDependencies(

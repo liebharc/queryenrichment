@@ -80,9 +80,7 @@ public class InMemoryPlanBuilderTest {
         final List<Step<?>> steps = this.createDefaultSteps();
         final PlanBuilder planBuilder = new InMemoryPlanBuilder(steps);
         final Request request = new Request(
-                Arrays.asList(Attributes.studentId,
-                        Attributes.lastName,
-                        Attributes.firstName),
+                Arrays.asList(Attributes.studentId),
                 Arrays.asList(SimpleExpression.eq(Attributes.lastName.getProperty(), "Smith")));
         final Plan build = planBuilder.build(request);
         final EnrichedQueryResult result = build.execute(request);
