@@ -36,9 +36,7 @@ public abstract class PlanBuilder {
         }
 
         final String domain = request.getAttributes().get(0).getDomain();
-
-        // IntermediateResult requires that all steps which require a filter are first in the list, the order method
-        // ensures that this holds true
+        
         final Map<Boolean, List<SimpleExpression>> groupedByQueryFilter = this.groupByQueryFilter(request.getCriteria());
         final List<Step<?>> filterSteps =
                 this.addDependencies(
