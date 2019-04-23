@@ -4,38 +4,40 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class Selector<T> {
+public class Selector<T> implements Step<T> {
 
-    public static final String NO_COLUMN = null;
-
-    private final Attribute<T> attributes;
+    private final Attribute<T> attribute;
     private final String column;
 
     public Selector(Attribute<T> attribute, String columnOrNull) {
-        this.attributes = attribute;
+        this.attribute = attribute;
         this.column = columnOrNull;
     }
 
+    @Override
     public Optional<String> getColumn() {
         return Optional.ofNullable(column);
     }
 
+    @Override
     public Attribute<T> getAttribute() {
-        return attributes;
+        return attribute;
     }
 
+    @Override
     public void enrich(IntermediateResult result) {
         result.addFromQuery(this);
     }
 
+    @Override
     public List<Attribute<?>> getDependencies() {
         return Collections.emptyList();
     }
 
     @Override
     public String toString() {
-        return "Selector{" +
-                "attributes=" + attributes +
+        return "Step{" +
+                "attribute=" + attribute +
                 '}';
     }
 }

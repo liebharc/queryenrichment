@@ -3,14 +3,18 @@ package com.github.liebharc.queryenrichment;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class Enrichment<T> extends Selector<T> {
+public abstract class Enrichment<T> implements Step<T> {
+
+    private final Attribute<T> attribute;
+    private final String column;
 
     public Enrichment(Attribute<T> attribute) {
         this(attribute, null);
     }
 
     public Enrichment(Attribute<T> attribute, String columnOrNull) {
-        super(attribute, columnOrNull);
+        this.attribute = attribute;
+        this.column = columnOrNull;
     }
 
     @Override
@@ -21,6 +25,11 @@ public abstract class Enrichment<T> extends Selector<T> {
 
     @Override
     public final Optional<String> getColumn() {
-        return Optional.empty();
+        return Optional.ofNullable(column);
+    }
+
+    @Override
+    public Attribute<T> getAttribute() {
+        return attribute;
     }
 }

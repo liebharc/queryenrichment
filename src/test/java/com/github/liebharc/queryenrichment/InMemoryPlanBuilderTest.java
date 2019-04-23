@@ -11,26 +11,26 @@ public class InMemoryPlanBuilderTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void invalidSelectorsTest() {
-        final List<Selector<?>> selectors =
+        final List<Step<?>> steps =
                 Arrays.asList(
                         InMemoryQueryBuilder.studentId,
                         InMemoryQueryBuilder.studentId);
-        new InMemoryPlanBuilder(selectors);
+        new InMemoryPlanBuilder(steps);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void multipleDomainsTest() {
-        final List<Selector<?>> selectors =
+        final List<Step<?>> steps =
                 Arrays.asList(
                         InMemoryQueryBuilder.studentId,
                         new SelectorBuilder<>(Attributes.teacherId).addColumn("ID").build());
-        InMemoryPlanBuilder planBuilder = new InMemoryPlanBuilder(selectors);
-        planBuilder.build(new Request(selectors.stream().map(Selector::getAttribute).collect(Collectors.toList())));
+        InMemoryPlanBuilder planBuilder = new InMemoryPlanBuilder(steps);
+        planBuilder.build(new Request(steps.stream().map(Step::getAttribute).collect(Collectors.toList())));
     }
 
     @Test
     public void findSelectorsSimpleTest() {
-        final List<Selector<?>> selectors =
+        final List<Step<?>> steps =
                 Arrays.asList(
                     InMemoryQueryBuilder.studentId,
                     InMemoryQueryBuilder.firstName,
@@ -39,7 +39,7 @@ public class InMemoryPlanBuilderTest {
                     new SelectorBuilder<>(Attributes.teacherFirstName).addColumn("FIRST_NAME").build(),
                     new SelectorBuilder<>(Attributes.teacherLastName).addColumn("LAST_NAME").build());
 
-        final PlanBuilder planBuilder = new InMemoryPlanBuilder(selectors);
+        final PlanBuilder planBuilder = new InMemoryPlanBuilder(steps);
 
         final Plan plan = planBuilder.build(
                         new Request(
@@ -47,18 +47,18 @@ public class InMemoryPlanBuilderTest {
                                     Attributes.lastName,
                                     Attributes.firstName)));
 
-        Assert.assertArrayEquals(plan.getSelectors().toArray(new Selector<?>[0]), new Selector<?>[] { selectors.get(0), selectors.get(2), selectors.get(1) });
+        Assert.assertArrayEquals(plan.getSteps().toArray(new Step<?>[0]), new Step<?>[] { steps.get(0), steps.get(2), steps.get(1) });
     }
 
     @Test
     public void planCacheTest() {
-        final List<Selector<?>> selectors =
+        final List<Step<?>> steps =
                 Arrays.asList(
                         InMemoryQueryBuilder.studentId,
                         InMemoryQueryBuilder.firstName,
                         InMemoryQueryBuilder.lastName);
 
-        final PlanBuilder planBuilder = new InMemoryPlanBuilder(selectors);
+        final PlanBuilder planBuilder = new InMemoryPlanBuilder(steps);
         final PlanCache planCache = new PlanCache(10, planBuilder);
         final Request request = new Request(
                 Arrays.asList(Attributes.studentId,

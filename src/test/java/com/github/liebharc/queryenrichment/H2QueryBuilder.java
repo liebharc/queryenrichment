@@ -10,11 +10,11 @@ import java.util.stream.Stream;
 public class H2QueryBuilder implements QueryBuilder{
 
 
-    public static final Selector<Long> studentId = new SelectorBuilder<>(Attributes.studentId).addColumn("ID").build();
-    public static final Selector<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("FIRST_NAME").build();
-    public static final Selector<String> lastName = new SelectorBuilder<>(Attributes.lastName).addColumn("LAST_NAME").build();
-    public static final Selector<Long> studentClass = new SelectorBuilder<>(Attributes.studentClass).addColumn("CLASS").build();
-    public static final Selector<String> fullName = new Enrichment<String>(Attributes.fullName) {
+    public static final Step<Long> studentId = new SelectorBuilder<>(Attributes.studentId).addColumn("ID").build();
+    public static final Step<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("FIRST_NAME").build();
+    public static final Step<String> lastName = new SelectorBuilder<>(Attributes.lastName).addColumn("LAST_NAME").build();
+    public static final Step<Long> studentClass = new SelectorBuilder<>(Attributes.studentClass).addColumn("CLASS").build();
+    public static final Step<String> fullName = new Enrichment<String>(Attributes.fullName) {
         @Override
         public void enrich(IntermediateResult result) {
             result.add(this, result.get(Attributes.firstName) + " " + result.get(Attributes.lastName));
@@ -33,12 +33,12 @@ public class H2QueryBuilder implements QueryBuilder{
     }
 
     @Override
-    public com.github.liebharc.queryenrichment.Query build(List<Selector<?>> selectors, String domain, List<SimpleExpression> filters) {
-        if (selectors.isEmpty()) {
+    public com.github.liebharc.queryenrichment.Query build(List<Step<?>> steps, String domain, List<SimpleExpression> filters) {
+        if (steps.isEmpty()) {
             throw  new IllegalArgumentException("At least one attribute must be selected");
         }
 
-        String select = selectors.stream().flatMap(sel -> {
+        String select = steps.stream().flatMap(sel -> {
             Optional<String> column = sel.getColumn();
             if (column.isPresent()) {
                 return Stream.of(column.get());
@@ -59,17 +59,17 @@ public class H2QueryBuilder implements QueryBuilder{
             query.append(FilterUtils.getSqlCriteria(filters));
         }
 
-        return new Query(query.toString(), selectors);
+        return new Query(query.toString(), steps);
     }
 
     private class Query implements com.github.liebharc.queryenrichment.Query {
 
         private final String query;
-        private final List<Selector<?>> selectors;
+        private final List<Step<?>> steps;
 
-        Query(String query, List<Selector<?>> selectors) {
+        Query(String query, List<Step<?>> steps) {
             this.query = query;
-            this.selectors = selectors;
+            this.steps = steps;
         }
 
         @Override
@@ -80,7 +80,7 @@ public class H2QueryBuilder implements QueryBuilder{
                 final List<List<Object>> results = new ArrayList<>();
                 while (resultSet.next()) {
                     final List<Object> row = new ArrayList<>();
-                    for (int i = 1; i <= selectors.size(); i++) {
+                    for (int i = 1; i <= steps.size(); i++) {
                         row.add(resultSet.getObject(i));
                     }
 

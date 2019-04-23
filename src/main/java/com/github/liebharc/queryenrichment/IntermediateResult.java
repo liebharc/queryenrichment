@@ -12,8 +12,8 @@ public class IntermediateResult {
 
     private final Map<Attribute, Object> results = new HashMap<>();
 
-    public<T> void add(Selector selector, T result) {
-        results.put(selector.getAttribute(), result);
+    public<T> void add(Step step, T result) {
+        results.put(step.getAttribute(), result);
     }
 
     @SuppressWarnings("unchecked")
@@ -21,9 +21,9 @@ public class IntermediateResult {
         return (T)results.get(attribute);
     }
 
-    public void addFromQuery(Selector<?> selector) {
+    public void addFromQuery(Step<?> step) {
         // Plan builder ensures that we can rely on the query result position here
-        Attribute<?> attribute = selector.getAttribute();
+        Attribute<?> attribute = step.getAttribute();
         results.put(attribute, this.cast(attribute.getAttributeClass(), queryResult.get(queryResultPos)));
         this.nextColumn();
     }

@@ -38,8 +38,8 @@ public class H2PlanBuilderTest {
 
     @Test
     public void queryTest() {
-        final List<Selector<?>> selectors = this.createDefaultSeletors();
-        final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+        final List<Step<?>> steps = this.createDefaultSeletors();
+        final PlanBuilder planBuilder = new H2PlanBuilder(statement, steps);
 
         final Plan plan = planBuilder.build(
                 new Request(
@@ -55,8 +55,8 @@ public class H2PlanBuilderTest {
 
     @Test
     public void withCriteriaTest() {
-        final List<Selector<?>> selectors = this.createDefaultSeletors();
-        final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+        final List<Step<?>> steps = this.createDefaultSeletors();
+        final PlanBuilder planBuilder = new H2PlanBuilder(statement, steps);
 
         final SimpleExpression criterion = SimpleExpression.neq("id", 11);
         final Plan plan = planBuilder.build(
@@ -73,8 +73,8 @@ public class H2PlanBuilderTest {
 
     @Test
     public void replaceSelectorByFilterTest() {
-        final List<Selector<?>> selectors = this.createDefaultSeletors();
-        final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+        final List<Step<?>> steps = this.createDefaultSeletors();
+        final PlanBuilder planBuilder = new H2PlanBuilder(statement, steps);
 
         final SimpleExpression criterion = SimpleExpression.eq("firstName", "David");
         final Plan plan = planBuilder.build(
@@ -84,7 +84,7 @@ public class H2PlanBuilderTest {
                                 Attributes.firstName),
                         Collections.singletonList(criterion)));
 
-        Assert.assertEquals(2, plan.getSelectors().stream().filter(sel -> !(sel instanceof FromFilterEnrichment)).count());
+        Assert.assertEquals(2, plan.getSteps().stream().filter(sel -> !(sel instanceof FromFilterEnrichment)).count());
         final String stringResult = this.resultToString(plan.execute());
         Assert.assertEquals(
                 "10,Tenant,David", stringResult);
@@ -92,8 +92,8 @@ public class H2PlanBuilderTest {
 
     @Test
     public void executeSimpleQueryTest() {
-        final List<Selector<?>> selectors = this.createDefaultSeletors();
-        final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+        final List<Step<?>> steps = this.createDefaultSeletors();
+        final PlanBuilder planBuilder = new H2PlanBuilder(statement, steps);
 
         final SimpleExpression criterion = SimpleExpression.eq("firstName", "David");
         final Plan plan = planBuilder.build(
@@ -109,8 +109,8 @@ public class H2PlanBuilderTest {
 
     @Test
     public void enrichmentWithManualDependencyResolutionTest() {
-        final List<Selector<?>> selectors = this.createDefaultSeletors();
-        final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+        final List<Step<?>> steps = this.createDefaultSeletors();
+        final PlanBuilder planBuilder = new H2PlanBuilder(statement, steps);
 
         final Plan plan = planBuilder.build(
                 new Request(
@@ -126,8 +126,8 @@ public class H2PlanBuilderTest {
 
     @Test
     public void enrichmentWithAutomaticDependencyResolutionTest() {
-        final List<Selector<?>> selectors = this.createDefaultSeletors();
-        final PlanBuilder planBuilder = new H2PlanBuilder(statement, selectors);
+        final List<Step<?>> steps = this.createDefaultSeletors();
+        final PlanBuilder planBuilder = new H2PlanBuilder(statement, steps);
 
         final Plan plan = planBuilder.build(
                 new Request(
@@ -146,7 +146,7 @@ public class H2PlanBuilderTest {
                 .collect(Collectors.joining("\n"));
     }
 
-    private List<Selector<?>> createDefaultSeletors() {
+    private List<Step<?>> createDefaultSeletors() {
         return Arrays.asList(
                 H2QueryBuilder.studentId,
                 H2QueryBuilder.firstName,

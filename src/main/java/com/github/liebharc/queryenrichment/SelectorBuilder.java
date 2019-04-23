@@ -13,7 +13,7 @@ public class SelectorBuilder<T> {
         return this;
     }
 
-    public Selector<T> build() {
+    public Step<T> build() {
         return new Selector<>(attribute, column);
     }
 }

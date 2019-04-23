@@ -6,12 +6,10 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class LoadIndicationTest {
     private final static long RESULT_SIZE = 10000;
@@ -21,10 +19,10 @@ public class LoadIndicationTest {
     private JdbcDataSource dataSource;
     private JdbcTemplate jdbcTemplate;
 
-    public static final Selector<Long> studentId = new SelectorBuilder<>(Attributes.studentId).addColumn("ID").build();
-    public static final Selector<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("firstName").build();
-    public static final Selector<String> lastName = new SelectorBuilder<>(Attributes.lastName).addColumn("lastName").build();
-    public static final Selector<Long> classId = new SelectorBuilder<>(Attributes.studentClass).addColumn("classId").build();
+    public static final Step<Long> studentId = new SelectorBuilder<>(Attributes.studentId).addColumn("ID").build();
+    public static final Step<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("firstName").build();
+    public static final Step<String> lastName = new SelectorBuilder<>(Attributes.lastName).addColumn("lastName").build();
+    public static final Step<Long> classId = new SelectorBuilder<>(Attributes.studentClass).addColumn("classId").build();
 
     @Before
     public void setupH2() throws SQLException {

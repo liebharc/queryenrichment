@@ -5,14 +5,14 @@ import java.util.List;
 
 public class Plan {
     private final List<Attribute<?>> attributes;
-    private final List<Selector<?>> selectors;
+    private final List<Step<?>> steps;
     private final List<AttributePosition> lookupTable;
     private final Query query;
     private final ExecutionStatistics statistics = new ExecutionStatistics();
 
-    public Plan(List<Attribute<?>> attributes, List<Selector<?>> selectors, List<AttributePosition> lookupTable, Query query) {
+    public Plan(List<Attribute<?>> attributes, List<Step<?>> steps, List<AttributePosition> lookupTable, Query query) {
         this.attributes = attributes;
-        this.selectors = Collections.unmodifiableList(selectors);
+        this.steps = Collections.unmodifiableList(steps);
         this.lookupTable = lookupTable;
         this.query = query;
     }
@@ -29,8 +29,8 @@ public class Plan {
                 Object[] row = new Object[attributes.size()];
                 intermediateResult.nextRow(rows.get(i));
 
-                for (Selector<?> selector : selectors) {
-                    selector.enrich(intermediateResult);
+                for (Step<?> step : steps) {
+                    step.enrich(intermediateResult);
                 }
 
                 for (AttributePosition attributePosition : lookupTable) {
@@ -47,7 +47,7 @@ public class Plan {
         }
     }
 
-    List<Selector<?>> getSelectors() {
-        return selectors;
+    List<Step<?>> getSteps() {
+        return steps;
     }
 }

@@ -4,8 +4,8 @@ import java.util.List;
 
 public class InMemoryPlanBuilder extends PlanBuilder {
 
-    public InMemoryPlanBuilder(List<Selector<?>> selectors) {
-        super(selectors);
+    public InMemoryPlanBuilder(List<Step<?>> steps) {
+        super(steps);
     }
 
     @Override

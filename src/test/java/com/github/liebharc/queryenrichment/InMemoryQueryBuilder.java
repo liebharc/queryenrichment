@@ -7,20 +7,20 @@ import java.util.stream.Collectors;
 public class InMemoryQueryBuilder implements QueryBuilder {
     public static final Database database = new Database();
 
-    public static final Selector<Long> studentId = new SelectorBuilder<>(Attributes.studentId).addColumn("ID").build();
-    public static final Selector<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("FIRST_NAME").build();
-    public static final Selector<String> lastName = new SelectorBuilder<>(Attributes.lastName).addColumn("LAST_NAME").build();
+    public static final Step<Long> studentId = new SelectorBuilder<>(Attributes.studentId).addColumn("ID").build();
+    public static final Step<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("FIRST_NAME").build();
+    public static final Step<String> lastName = new SelectorBuilder<>(Attributes.lastName).addColumn("LAST_NAME").build();
 
     public InMemoryQueryBuilder() {
     }
 
     @Override
-    public com.github.liebharc.queryenrichment.Query build(List<Selector<?>> selectors, String domain, List<SimpleExpression> filters) {
+    public com.github.liebharc.queryenrichment.Query build(List<Step<?>> steps, String domain, List<SimpleExpression> filters) {
         if (!filters.isEmpty()) {
             throw new IllegalArgumentException("This class doesn't support criteria");
         }
 
-        return new Query(selectors);
+        return new Query(steps);
     }
 
     public static class Database {
@@ -45,17 +45,17 @@ public class InMemoryQueryBuilder implements QueryBuilder {
 
     public class Query implements com.github.liebharc.queryenrichment.Query {
 
-        private final List<Selector<?>> selectors;
+        private final List<Step<?>> steps;
 
-        public Query(List<Selector<?>> selectors) {
+        public Query(List<Step<?>> steps) {
 
-            this.selectors = selectors;
+            this.steps = steps;
         }
 
         @Override
         public QueryResult query() {
             List<List<Object>> rows = database.students.stream().map(student ->
-                    selectors.stream().map(selector -> {
+                    steps.stream().map(selector -> {
                         if (selector.equals(studentId)) {
                             return (Object)student.getId();
                         } else if (selector.equals(firstName)) {

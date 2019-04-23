@@ -10,18 +10,18 @@ public class TopologicalSort {
 
     }
 
-    public List<Selector<?>> sort(Collection<Selector<?>> source, Map<Attribute, Selector<?>> attributeToSelector) {
-        final List<Selector<?>> sorted = new ArrayList<>();
-        final Set<Selector<?>> visitedSet = new HashSet<>();
+    public List<Step<?>> sort(Collection<Step<?>> source, Map<Attribute, Step<?>> attributeToSelector) {
+        final List<Step<?>> sorted = new ArrayList<>();
+        final Set<Step<?>> visitedSet = new HashSet<>();
 
-        for (Selector<?> item : source) {
+        for (Step<?> item : source) {
             this.visit(item, visitedSet, sorted, attributeToSelector);
         }
 
         return sorted;
     }
 
-    private void visit(Selector<?> item, Set<Selector<?>> visited, List<Selector<?>> sorted, Map<Attribute, Selector<?>> attributeToSelector) {
+    private void visit(Step<?> item, Set<Step<?>> visited, List<Step<?>> sorted, Map<Attribute, Step<?>> attributeToSelector) {
         if (visited.contains(item)) {
             if (!sorted.contains(item)) {
                 throw new IllegalArgumentException("Cyclic dependency found, stopped at " + item);
@@ -32,12 +32,12 @@ public class TopologicalSort {
 
             List<Attribute<?>> dependencies = item.getDependencies();
             for (Attribute dependency : dependencies) {
-                Selector<?> selectorDependency = attributeToSelector.get(dependency);
-                if (selectorDependency == null) {
+                Step<?> stepDependency = attributeToSelector.get(dependency);
+                if (stepDependency == null) {
                     throw new IllegalArgumentException("Unresolved dependency found. " + item + " requires " + dependency);
                 }
 
-                this.visit(selectorDependency, visited, sorted, attributeToSelector);
+                this.visit(stepDependency, visited, sorted, attributeToSelector);
             }
 
 

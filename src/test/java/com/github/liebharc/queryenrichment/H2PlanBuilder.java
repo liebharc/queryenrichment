@@ -7,8 +7,8 @@ public class H2PlanBuilder extends PlanBuilder {
 
     private final Statement statement;
 
-    public H2PlanBuilder(Statement statement, List<Selector<?>> selectors) {
-        super(selectors);
+    public H2PlanBuilder(Statement statement, List<Step<?>> steps) {
+        super(steps);
         this.statement = statement;
     }
 

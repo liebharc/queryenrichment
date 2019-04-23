@@ -4,19 +4,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class PlanBuilder {
-    private final Map<Attribute, Selector<?>> attributeToSelector = new HashMap<>();
+    private final Map<Attribute, Step<?>> attributeToSelector = new HashMap<>();
 
-    public PlanBuilder(List<Selector<?>> selectors) {
+    public PlanBuilder(List<Step<?>> steps) {
         final StringBuilder errorBuilder = new StringBuilder(0);
 
-        for (Selector<?> selector : selectors) {
-            Selector<?> previousMapping= this.attributeToSelector.put(selector.getAttribute(), selector);
+        for (Step<?> step : steps) {
+            Step<?> previousMapping= this.attributeToSelector.put(step.getAttribute(), step);
 
             if (previousMapping != null) {
-                errorBuilder.append(selector.getAttribute())
-                        .append("  has more than one selector; ")
+                errorBuilder.append(step.getAttribute())
+                        .append("  has more than one step; ")
                         .append(previousMapping).append(" and ")
-                        .append(selector).append("\n");
+                        .append(step).append("\n");
             }
         }
 
@@ -37,15 +37,15 @@ public abstract class PlanBuilder {
 
         String domain = request.getAttributes().get(0).getDomain();
 
-        // IntermediateResult requires that all selectors which require a filter are first in the list, the order method
+        // IntermediateResult requires that all steps which require a filter are first in the list, the order method
         // ensures that this holds true
-        final List<Selector<?>> selectors =
+        final List<Step<?>> steps =
                 this.orderSelectorsByDependencies(
                         this.addDependencies(
                             this.findRequiredSelectors(request)));
         final List<SimpleExpression> filters = this.translatePropertyNames(domain, request.getCriteria());
-        final List<Selector<?>> queryColumns = selectors.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
-        return new Plan(request.getAttributes(), selectors, this.createLookupTable(request.getAttributes()), this.getQueryBuilder().build(queryColumns, domain, filters));
+        final List<Step<?>> queryColumns = steps.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
+        return new Plan(request.getAttributes(), steps, this.createLookupTable(request.getAttributes()), this.getQueryBuilder().build(queryColumns, domain, filters));
     }
 
     private boolean hasMultipleDomains(List<Attribute<?>> attributes) {
@@ -53,7 +53,7 @@ public abstract class PlanBuilder {
         return attributes.stream().anyMatch(attr -> !attr.getDomain().equals(domain));
     }
 
-    private List<Selector<?>> findRequiredSelectors(Request request) {
+    private List<Step<?>> findRequiredSelectors(Request request) {
         Map<String, SimpleExpression> equalityFilters = request.getCriteria().stream()
                 .filter(this::isEqualityExpression)
                 .collect(Collectors.toMap(SimpleExpression::getPropertyName, expr -> expr));
@@ -70,16 +70,16 @@ public abstract class PlanBuilder {
     }
 
 
-    private List<Selector<?>> addDependencies(List<Selector<?>> requiredSelectors) {
-        final List<Selector<?>> result = new ArrayList<>();
-        for (Selector<?> selector : requiredSelectors) {
-            this.addDependency(result, selector);
+    private List<Step<?>> addDependencies(List<Step<?>> requiredSteps) {
+        final List<Step<?>> result = new ArrayList<>();
+        for (Step<?> step : requiredSteps) {
+            this.addDependency(result, step);
         }
 
         return result;
     }
 
-    private void addDependency(List<Selector<?>> result, Selector<?> item) {
+    private void addDependency(List<Step<?>> result, Step<?> item) {
         if (result.contains(item)) {
             return;
         }
@@ -91,14 +91,14 @@ public abstract class PlanBuilder {
         }
     }
 
-    private List<Selector<?>> orderSelectorsByDependencies(List<Selector<?>> selectors) {
-        return TopologicalSort.INSTANCE.sort(selectors, attributeToSelector);
+    private List<Step<?>> orderSelectorsByDependencies(List<Step<?>> steps) {
+        return TopologicalSort.INSTANCE.sort(steps, attributeToSelector);
     }
 
     private List<SimpleExpression> translatePropertyNames(String domain, List<SimpleExpression> criteria) {
         return criteria.stream().map(expr -> {
             final Attribute<?> attribute = new Attribute<>(expr.getValue().getClass(), domain, expr.getPropertyName());
-            final Optional<String> selector = Optional.ofNullable(attributeToSelector.get(attribute)).flatMap(Selector::getColumn);
+            final Optional<String> selector = Optional.ofNullable(attributeToSelector.get(attribute)).flatMap(Step::getColumn);
             return selector.map(s -> new SimpleExpression(s, expr.getOperation(), expr.getValue())).orElse(expr);
         }).collect(Collectors.toList());
     }
