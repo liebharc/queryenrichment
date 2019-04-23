@@ -1,8 +1,6 @@
 package com.github.liebharc.queryenrichment;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,10 +24,10 @@ public class H2QueryBuilder implements QueryBuilder{
         }
     };
 
-    private final Statement statement;
+    private final Connection connection;
 
-    H2QueryBuilder(Statement statement) {
-        this.statement = statement;
+    H2QueryBuilder(Connection connection) {
+        this.connection = connection;
     }
 
     @Override
@@ -59,23 +57,33 @@ public class H2QueryBuilder implements QueryBuilder{
             query.append(FilterUtils.getSqlCriteria(filters));
         }
 
-        return new Query(query.toString(), steps);
+        try {
+            return new Query(connection.prepareStatement(query.toString()), steps);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private class Query implements com.github.liebharc.queryenrichment.Query {
 
-        private final String query;
+        private final PreparedStatement query;
         private final List<Step<?>> steps;
 
-        Query(String query, List<Step<?>> steps) {
+        Query(PreparedStatement query, List<Step<?>> steps) {
             this.query = query;
             this.steps = steps;
         }
 
         @Override
-        public QueryResult query() {
+        public QueryResult query(Request request) {
             try {
-                ResultSet resultSet = statement.executeQuery(query);
+                int pos = 1;
+                for (SimpleExpression criterion : request.getCriteria()) {
+                    query.setObject(pos, criterion.getValue());
+                    pos++;
+                }
+
+                ResultSet resultSet = query.executeQuery();
 
                 final List<List<Object>> results = new ArrayList<>();
                 while (resultSet.next()) {

@@ -53,7 +53,7 @@ public class InMemoryQueryBuilder implements QueryBuilder {
         }
 
         @Override
-        public QueryResult query() {
+        public QueryResult query(Request request) {
             List<List<Object>> rows = database.students.stream().map(student ->
                     steps.stream().map(selector -> {
                         if (selector.equals(studentId)) {

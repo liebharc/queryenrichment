@@ -43,13 +43,12 @@ public class SimpleExpression {
         if (o == null || getClass() != o.getClass()) return false;
         SimpleExpression that = (SimpleExpression) o;
         return Objects.equals(propertyName, that.propertyName) &&
-                Objects.equals(operation, that.operation) &&
-                Objects.equals(value, that.value);
+                Objects.equals(operation, that.operation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(propertyName, operation, value);
+        return Objects.hash(propertyName, operation);
     }
 
     @Override
@@ -59,5 +58,9 @@ public class SimpleExpression {
         }
 
         return propertyName + operation + value;
+    }
+
+    public String toPlaceHolderString() {
+        return propertyName + operation + "?";
     }
 }

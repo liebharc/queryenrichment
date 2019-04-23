@@ -15,10 +15,10 @@ public class Plan {
         this.query = query;
     }
 
-    public EnrichedQueryResult execute() {
+    public EnrichedQueryResult execute(Request request) {
         long start = System.currentTimeMillis();
         try {
-            final QueryResult queryResult = query.query();
+            final QueryResult queryResult = query.query(request);
             statistics.addQueryTime(System.currentTimeMillis() - start);
             final List<List<Object>> rows = queryResult.getRows();
             final Object[][] results = new Object[rows.size()][];

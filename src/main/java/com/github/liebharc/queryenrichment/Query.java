@@ -2,5 +2,5 @@ package com.github.liebharc.queryenrichment;
 
 public interface Query {
 
-    QueryResult query();
+    QueryResult query(Request request);
 }

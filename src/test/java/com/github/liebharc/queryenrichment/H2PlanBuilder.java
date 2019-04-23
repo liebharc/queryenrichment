@@ -1,19 +1,20 @@
 package com.github.liebharc.queryenrichment;
 
+import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
 
 public class H2PlanBuilder extends PlanBuilder {
 
-    private final Statement statement;
+    private final Connection connection;
 
-    public H2PlanBuilder(Statement statement, List<Step<?>> steps) {
+    public H2PlanBuilder(Connection connection, List<Step<?>> steps) {
         super(steps);
-        this.statement = statement;
+        this.connection = connection;
     }
 
     @Override
     protected QueryBuilder getQueryBuilder() {
-        return new H2QueryBuilder(statement);
+        return new H2QueryBuilder(connection);
     }
 }

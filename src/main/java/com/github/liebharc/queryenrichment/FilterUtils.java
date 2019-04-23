@@ -13,7 +13,7 @@ public class FilterUtils {
                 result.append(" and ");
             }
 
-            result.append(criterion.toString());
+            result.append(criterion.toPlaceHolderString());
             isFirst = false;
         }
 

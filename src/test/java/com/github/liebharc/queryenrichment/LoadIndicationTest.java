@@ -67,14 +67,14 @@ public class LoadIndicationTest {
     @Test
     public void planIndication() {
         long start = System.currentTimeMillis();
-        final PlanBuilder planBuilder = new H2PlanBuilder(statement, Arrays.asList(studentId, firstName, lastName, classId));
+        final PlanBuilder planBuilder = new H2PlanBuilder(connection, Arrays.asList(studentId, firstName, lastName, classId));
         final PlanCache planCache = new PlanCache(10, planBuilder);
         for (int i = 0; i < ITERATIONS; i++) {
             final Request request =
                     new Request(Arrays.asList(Attributes.studentId, Attributes.lastName, Attributes.studentClass),
                             Arrays.asList(SimpleExpression.eq(Attributes.studentClass.getProperty(), 1)));
             Plan plan = planCache.getOrBuildPlan(request);
-            EnrichedQueryResult result = plan.execute();
+            EnrichedQueryResult result = plan.execute(request);
             Assert.assertEquals(RESULT_SIZE, result.getResults().length);
         }
 
