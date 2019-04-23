@@ -6,14 +6,12 @@ import java.util.List;
 public class Plan {
     private final List<Attribute<?>> attributes;
     private final List<Step<?>> steps;
-    private final List<AttributePosition> lookupTable;
     private final Query query;
     private final ExecutionStatistics statistics = new ExecutionStatistics();
 
-    public Plan(List<Attribute<?>> attributes, List<Step<?>> steps, List<AttributePosition> lookupTable, Query query) {
+    public Plan(List<Attribute<?>> attributes, List<Step<?>> steps, Query query) {
         this.attributes = attributes;
         this.steps = Collections.unmodifiableList(steps);
-        this.lookupTable = lookupTable;
         this.query = query;
     }
 
@@ -33,8 +31,10 @@ public class Plan {
                     step.enrich(intermediateResult);
                 }
 
-                for (AttributePosition attributePosition : lookupTable) {
-                    row[attributePosition.getPosition()] = intermediateResult.get(attributePosition.getAttribute());
+                int pos = 0;
+                for (Attribute attribute : attributes) {
+                    row[pos] = intermediateResult.get(attribute);
+                    pos++;
                 }
 
                 results[i] = row;

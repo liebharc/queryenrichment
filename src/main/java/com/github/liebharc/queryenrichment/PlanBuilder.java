@@ -45,7 +45,7 @@ public abstract class PlanBuilder {
                             this.findRequiredSelectors(request)));
         final List<SimpleExpression> filters = this.translatePropertyNames(domain, request.getCriteria());
         final List<Step<?>> queryColumns = steps.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
-        return new Plan(request.getAttributes(), steps, this.createLookupTable(request.getAttributes()), this.getQueryBuilder().build(queryColumns, domain, filters));
+        return new Plan(request.getAttributes(), steps, this.getQueryBuilder().build(queryColumns, domain, filters));
     }
 
     private boolean hasMultipleDomains(List<Attribute<?>> attributes) {
@@ -108,15 +108,6 @@ public abstract class PlanBuilder {
      */
     private boolean isEqualityExpression(SimpleExpression expr) {
         return expr.getOperation().equals("=");
-    }
-
-    private List<AttributePosition> createLookupTable(List<Attribute<?>> attributes) {
-        final List<AttributePosition> lookup = new ArrayList<>(attributes.size());
-        for (int i = 0; i < attributes.size(); i++) {
-            lookup.add(new AttributePosition(attributes.get(i), i));
-        }
-
-        return lookup;
     }
 
     protected abstract QueryBuilder getQueryBuilder();
