@@ -1,5 +1,6 @@
 package com.github.liebharc.queryenrichment;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,41 +28,50 @@ public class Plan {
             final QueryResult queryResult = query.query(request);
             statistics.addQueryTime(System.currentTimeMillis() - start);
             final List<List<Object>> rows = queryResult.getRows();
-            final Object[][] results = new Object[rows.size()][];
+            final List<Object[]> results = new ArrayList<>();
             final IntermediateResult intermediateResult = new IntermediateResult();
             boolean isFirstRow = true;
             for (int i = 0; i < rows.size(); i++) {
-                Object[] row = new Object[attributes.size()];
                 intermediateResult.nextRow(rows.get(i));
-
-                if (isFirstRow) {
-                    // determine constants once
-                    for (Step<?> step : constants) {
-                        step.enrich(intermediateResult);
-                    }
-
-                    intermediateResult.markCurrentResultAsConstant();
-                }
-
-                for (Step<?> step : steps) {
-                    step.enrich(intermediateResult);
-                }
-
-                int pos = 0;
-                for (Attribute attribute : attributes) {
-                    row[pos] = intermediateResult.get(attribute);
-                    pos++;
-                }
-
-                results[i] = row;
-                isFirstRow = false;
+                isFirstRow = this.processRow(results, intermediateResult, isFirstRow);
             }
 
-            return new EnrichedQueryResult(attributes, results);
+            return new EnrichedQueryResult(attributes, results.toArray(new Object[0][]));
         }
         finally {
             statistics.addTotal(System.currentTimeMillis() - start);
         }
+    }
+
+    private boolean processRow(List<Object[]> results, IntermediateResult intermediateResult, boolean isFirstRow) {
+        if (isFirstRow) {
+            // determine constants once
+            for (Step<?> step : constants) {
+                step.enrich(intermediateResult);
+                if (!intermediateResult.isContinueProcessing()) {
+                    return true;
+                }
+            }
+
+            intermediateResult.markCurrentResultAsConstant();
+        }
+
+        for (Step<?> step : steps) {
+            step.enrich(intermediateResult);
+            if (!intermediateResult.isContinueProcessing()) {
+                return false;
+            }
+        }
+
+        int pos = 0;
+        Object[] row = new Object[attributes.size()];
+        for (Attribute attribute : attributes) {
+            row[pos] = intermediateResult.get(attribute);
+            pos++;
+        }
+
+        results.add(row);
+        return false;
     }
 
     List<Step<?>> getSteps() {

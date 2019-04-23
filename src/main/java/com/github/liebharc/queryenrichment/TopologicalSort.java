@@ -10,7 +10,7 @@ public class TopologicalSort {
 
     }
 
-    public List<Step<?>> sort(Collection<Step<?>> source, Map<Attribute, Step<?>> attributeToSelector) {
+    public List<Step<?>> sort(Collection<Step<?>> source, Map<Attribute<?>, Step<?>> attributeToSelector) {
         final List<Step<?>> sorted = new ArrayList<>();
         final Set<Step<?>> visitedSet = new HashSet<>();
 
@@ -21,7 +21,7 @@ public class TopologicalSort {
         return sorted;
     }
 
-    private void visit(Step<?> item, Set<Step<?>> visited, List<Step<?>> sorted, Map<Attribute, Step<?>> attributeToSelector) {
+    private void visit(Step<?> item, Set<Step<?>> visited, List<Step<?>> sorted, Map<Attribute<?>, Step<?>> attributeToSelector) {
         if (visited.contains(item)) {
             if (!sorted.contains(item)) {
                 throw new IllegalArgumentException("Cyclic dependency found, stopped at " + item);

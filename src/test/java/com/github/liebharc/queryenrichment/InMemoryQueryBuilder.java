@@ -48,7 +48,6 @@ public class InMemoryQueryBuilder implements QueryBuilder {
         private final List<Step<?>> steps;
 
         public Query(List<Step<?>> steps) {
-
             this.steps = steps;
         }
 
@@ -56,11 +55,12 @@ public class InMemoryQueryBuilder implements QueryBuilder {
         public QueryResult query(Request request) {
             List<List<Object>> rows = database.students.stream().map(student ->
                     steps.stream().map(selector -> {
-                        if (selector.equals(studentId)) {
+                        Attribute<?> attribute = selector.getAttribute();
+                        if (attribute.equals(Attributes.studentId)) {
                             return (Object)student.getId();
-                        } else if (selector.equals(firstName)) {
+                        } else if (attribute.equals(Attributes.firstName)) {
                             return (Object)student.getFirstName();
-                        } else if (selector.equals(lastName)) {
+                        } else if (attribute.equals(Attributes.lastName)) {
                             return (Object)student.getLastName();
                         }
 

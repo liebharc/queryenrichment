@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class PlanBuilder {
-    private final Map<Attribute, Step<?>> attributeToSelector = new HashMap<>();
+    private final Map<Attribute<?>, Step<?>> attributeToSelector = new HashMap<>();
 
     public PlanBuilder(List<Step<?>> steps) {
         final StringBuilder errorBuilder = new StringBuilder(0);
@@ -35,16 +35,27 @@ public abstract class PlanBuilder {
             throw new IllegalArgumentException("Can't query for multiple domain in one request");
         }
 
-        String domain = request.getAttributes().get(0).getDomain();
+        final String domain = request.getAttributes().get(0).getDomain();
 
         // IntermediateResult requires that all steps which require a filter are first in the list, the order method
         // ensures that this holds true
-        List<Step<?>> allRequiredSteps =
-                this.injectConstants(request,
-                    this.addDependencies(
-                        this.findRequiredSelectors(request)));
+        final Map<Boolean, List<SimpleExpression>> groupedByQueryFilter = this.groupByQueryFilter(request.getCriteria());
+        final List<Step<?>> filterSteps =
+                this.addDependencies(
+                        this.createFilterSteps(
+                            domain,
+                            groupedByQueryFilter.getOrDefault(false, Collections.emptyList())));
+        List<SimpleExpression> sqlQueryExpressions = groupedByQueryFilter.getOrDefault(true, Collections.emptyList());
+        final List<Step<?>> allRequiredSteps =
+                this.addStepsForFilters(filterSteps,
+                    this.injectConstants(sqlQueryExpressions,
+                        this.addDependencies(
+                            this.findRequiredSelectors(sqlQueryExpressions, request))));
         final List<Step<?>> orderedSteps = this.orderSelectorsByDependencies(allRequiredSteps);
-        final List<SimpleExpression> filters = this.translatePropertyNames(domain, request.getCriteria());
+        final List<SimpleExpression> filters =
+                this.translatePropertyNames(
+                        domain,
+                        groupedByQueryFilter.getOrDefault(true, Collections.emptyList()));
         final List<Step<?>> queryColumns =
                 orderedSteps.stream()
                         .filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
@@ -54,6 +65,30 @@ public abstract class PlanBuilder {
                 groupedByConstant.get(true),
                 groupedByConstant.get(false),
                 this.getQueryBuilder().build(queryColumns, domain, filters));
+    }
+
+    private List<Step<?>> addStepsForFilters(List<Step<?>> filterSteps, List<Step<?>> requiredSelectors) {
+        final List<Step<?>> result = new ArrayList<>(filterSteps.size() + requiredSelectors.size());
+        result.addAll(filterSteps);
+        for (Step<?> selector : requiredSelectors) {
+            if (!result.contains(selector)) {
+                result.add(selector);
+            }
+        }
+
+        return result;
+    }
+
+    private List<Step<?>> createFilterSteps(String domain, List<SimpleExpression> javaFilters) {
+        return javaFilters.stream().map(expr -> {
+            final Attribute<Object> attribute = new Attribute<>(Object.class, domain, expr.getPropertyName());
+            final Step<?> step = attributeToSelector.get(attribute);
+            if (step == null) {
+                throw new IllegalArgumentException("Failed to find selector for expression " + expr);
+            }
+
+            return new Filter<>(step, expr);
+        }).collect(Collectors.toList());
     }
 
     private Map<Boolean, List<Step<?>>> groupByConstant(List<Step<?>> steps) {
@@ -85,8 +120,8 @@ public abstract class PlanBuilder {
         return attributes.stream().anyMatch(attr -> !attr.getDomain().equals(domain));
     }
 
-    private List<Step<?>> injectConstants(Request request, List<Step<?>> steps) {
-        Map<String, SimpleExpression> equalityFilters = request.getCriteria().stream()
+    private List<Step<?>> injectConstants(List<SimpleExpression> queryFilters, List<Step<?>> steps) {
+        Map<String, SimpleExpression> equalityFilters = queryFilters.stream()
                 .filter(this::isEqualityExpression)
                 .collect(Collectors.toMap(SimpleExpression::getPropertyName, expr -> expr));
 
@@ -105,8 +140,8 @@ public abstract class PlanBuilder {
         }).collect(Collectors.toList());
     }
 
-    private List<Step<?>> findRequiredSelectors(Request request) {
-        Map<String, SimpleExpression> equalityFilters = request.getCriteria().stream()
+    private List<Step<?>> findRequiredSelectors(List<SimpleExpression> queryExpressions, Request request) {
+        Map<String, SimpleExpression> equalityFilters = queryExpressions.stream()
                 .filter(this::isEqualityExpression)
                 .collect(Collectors.toMap(SimpleExpression::getPropertyName, expr -> expr));
 
@@ -149,7 +184,7 @@ public abstract class PlanBuilder {
     }
 
     private List<Step<?>> orderSelectorsByDependencies(List<Step<?>> steps) {
-        final Map<Attribute, Step<?>> attributeToSelectorsWithConstants = new HashMap<>(attributeToSelector);
+        final Map<Attribute<?>, Step<?>> attributeToSelectorsWithConstants = new HashMap<>(attributeToSelector);
         for (Step<?> step : steps) {
             if (step.isConstant()) {
                 attributeToSelectorsWithConstants.put(step.getAttribute(), step);
@@ -165,6 +200,14 @@ public abstract class PlanBuilder {
             final Optional<String> selector = Optional.ofNullable(attributeToSelector.get(attribute)).flatMap(Step::getColumn);
             return selector.map(s -> new SimpleExpression(s, expr.getOperation(), expr.getValue())).orElse(expr);
         }).collect(Collectors.toList());
+    }
+
+    private Map<Boolean, List<SimpleExpression>> groupByQueryFilter(List<SimpleExpression> criteria) {
+        return criteria.stream().collect(Collectors.groupingBy(this::isSupportedByQuery));
+    }
+
+    protected boolean isSupportedByQuery(SimpleExpression criteria) {
+        return true;
     }
 
     /**

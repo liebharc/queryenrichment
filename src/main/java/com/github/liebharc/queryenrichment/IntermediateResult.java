@@ -14,6 +14,8 @@ public class IntermediateResult {
 
     private Map<Attribute, Object> constants = new HashMap<>();
 
+    private boolean continueProcessing = true;
+
     public<T> void add(Step step, T result) {
         results.put(step.getAttribute(), result);
     }
@@ -82,6 +84,15 @@ public class IntermediateResult {
     private void clear() {
         results.clear();
         queryResultPos = 0;
+        continueProcessing = true;
+    }
+
+    public boolean isContinueProcessing() {
+        return continueProcessing;
+    }
+
+    public void stopProcessing() {
+        continueProcessing = false;
     }
 
     public void markCurrentResultAsConstant() {

@@ -12,4 +12,9 @@ public class InMemoryPlanBuilder extends PlanBuilder {
     protected QueryBuilder getQueryBuilder() {
         return new InMemoryQueryBuilder();
     }
+
+    @Override
+    protected boolean isSupportedByQuery(SimpleExpression criteria) {
+        return false;
+    }
 }

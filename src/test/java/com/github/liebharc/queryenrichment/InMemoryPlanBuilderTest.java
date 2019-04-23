@@ -58,11 +58,7 @@ public class InMemoryPlanBuilderTest {
 
     @Test
     public void planCacheTest() {
-        final List<Step<?>> steps =
-                Arrays.asList(
-                        InMemoryQueryBuilder.studentId,
-                        InMemoryQueryBuilder.firstName,
-                        InMemoryQueryBuilder.lastName);
+        final List<Step<?>> steps = this.createDefaultSteps();
 
         final PlanBuilder planBuilder = new InMemoryPlanBuilder(steps);
         final PlanCache planCache = new PlanCache(10, planBuilder);
@@ -74,5 +70,29 @@ public class InMemoryPlanBuilderTest {
         final Plan plan1 = planCache.getOrBuildPlan(request);
         final Plan plan2 = planCache.getOrBuildPlan(request);
         Assert.assertSame(plan1, plan2);
+    }
+
+    @Test
+    public void javaFiltersTest() {
+        InMemoryQueryBuilder.database.add(new Student(10, "David", "Tenant"));
+        InMemoryQueryBuilder.database.add(new Student(11, "Matt", "Smith"));
+
+        final List<Step<?>> steps = this.createDefaultSteps();
+        final PlanBuilder planBuilder = new InMemoryPlanBuilder(steps);
+        final Request request = new Request(
+                Arrays.asList(Attributes.studentId,
+                        Attributes.lastName,
+                        Attributes.firstName),
+                Arrays.asList(SimpleExpression.eq(Attributes.lastName.getProperty(), "Smith")));
+        final Plan build = planBuilder.build(request);
+        final EnrichedQueryResult result = build.execute(request);
+        Assert.assertEquals(1, result.getResults().length);
+    }
+
+    private List<Step<?>> createDefaultSteps() {
+        return Arrays.asList(
+                InMemoryQueryBuilder.studentId,
+                InMemoryQueryBuilder.firstName,
+                InMemoryQueryBuilder.lastName);
     }
 }
