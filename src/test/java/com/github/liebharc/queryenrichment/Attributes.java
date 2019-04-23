@@ -7,6 +7,7 @@ public class Attributes {
     public static final Attribute<String> lastName = new Attribute<>(String.class, "student", "lastName");
     public static final Attribute<Long> studentClass = new Attribute<>(Long.class, "student", "class");
     public static final Attribute<String> fullName = new Attribute<>(String.class, "student", "fullName");
+    public static final Attribute<String> classIdString = new Attribute<>(String.class, "student", "idString");
 
 
     public static final Attribute<Long> teacherId = new Attribute<>(Long.class, "teacher", "id");

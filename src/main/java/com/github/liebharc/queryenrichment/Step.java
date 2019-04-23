@@ -14,4 +14,6 @@ public interface Step<T> {
     void enrich(IntermediateResult result);
 
     List<Attribute<?>> getDependencies();
+
+    boolean isConstant();
 }

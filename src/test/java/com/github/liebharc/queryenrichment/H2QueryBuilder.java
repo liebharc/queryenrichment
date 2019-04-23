@@ -5,8 +5,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class H2QueryBuilder implements QueryBuilder{
+public class H2QueryBuilder implements QueryBuilder {
 
+    public static int classIdStringCalls = 0;
 
     public static final Step<Long> studentId = new SelectorBuilder<>(Attributes.studentId).addColumn("ID").build();
     public static final Step<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("FIRST_NAME").build();
@@ -24,6 +25,19 @@ public class H2QueryBuilder implements QueryBuilder{
         }
     };
 
+    public static final Step<String> classIdString = new Enrichment<String>(Attributes.classIdString) {
+        @Override
+        public void enrich(IntermediateResult result) {
+            classIdStringCalls++;
+            result.add(this, "Class: " + result.get(Attributes.studentClass));
+        }
+
+        @Override
+        public List<Attribute<?>> getDependencies() {
+            return Arrays.asList(Attributes.studentClass);
+        }
+    };
+
     private final Connection connection;
 
     H2QueryBuilder(Connection connection) {
@@ -32,20 +46,7 @@ public class H2QueryBuilder implements QueryBuilder{
 
     @Override
     public com.github.liebharc.queryenrichment.Query build(List<Step<?>> steps, String domain, List<SimpleExpression> filters) {
-        if (steps.isEmpty()) {
-            throw  new IllegalArgumentException("At least one attribute must be selected");
-        }
-
-        String select = steps.stream().flatMap(sel -> {
-            Optional<String> column = sel.getColumn();
-            if (column.isPresent()) {
-                return Stream.of(column.get());
-            } else {
-                final List<String> empty = Collections.emptyList();
-                return empty.stream();
-            }
-        }).collect(Collectors.joining(", "));
-
+        final String select = this.createSelectStatement(steps);
         final StringBuilder query = new StringBuilder();
         query.append("SELECT ");
         query.append(select);
@@ -62,6 +63,22 @@ public class H2QueryBuilder implements QueryBuilder{
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String createSelectStatement(List<Step<?>> steps) {
+        if (steps.isEmpty()) {
+            return "1";
+        }
+
+        return steps.stream().flatMap(sel -> {
+            Optional<String> column = sel.getColumn();
+            if (column.isPresent()) {
+                return Stream.of(column.get());
+            } else {
+                final List<String> empty = Collections.emptyList();
+                return empty.stream();
+            }
+        }).collect(Collectors.joining(", "));
     }
 
     private class Query implements com.github.liebharc.queryenrichment.Query {

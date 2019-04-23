@@ -39,18 +39,70 @@ public abstract class PlanBuilder {
 
         // IntermediateResult requires that all steps which require a filter are first in the list, the order method
         // ensures that this holds true
-        final List<Step<?>> steps =
-                this.orderSelectorsByDependencies(
-                        this.addDependencies(
-                            this.findRequiredSelectors(request)));
+        List<Step<?>> allRequiredSteps =
+                this.injectConstants(request,
+                    this.addDependencies(
+                        this.findRequiredSelectors(request)));
+        final List<Step<?>> orderedSteps = this.orderSelectorsByDependencies(allRequiredSteps);
         final List<SimpleExpression> filters = this.translatePropertyNames(domain, request.getCriteria());
-        final List<Step<?>> queryColumns = steps.stream().filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
-        return new Plan(request.getAttributes(), steps, this.getQueryBuilder().build(queryColumns, domain, filters));
+        final List<Step<?>> queryColumns =
+                orderedSteps.stream()
+                        .filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
+        final Map<Boolean, List<Step<?>>> groupedByConstant = this.groupByConstant(orderedSteps);
+        return new Plan(
+                request.getAttributes(),
+                groupedByConstant.get(true),
+                groupedByConstant.get(false),
+                this.getQueryBuilder().build(queryColumns, domain, filters));
+    }
+
+    private Map<Boolean, List<Step<?>>> groupByConstant(List<Step<?>> steps) {
+        final List<Step<?>> constant = new ArrayList<>();
+        final Set<Attribute<?>> constantAttributes = new HashSet<>();
+        final List<Step<?>> notConstant = new ArrayList<>();
+        for (Step<?> step : steps) {
+            if (step.isConstant() && step.getDependencies().isEmpty()) {
+                constant.add(step);
+                constantAttributes.add(step.getAttribute());
+            }
+            else if (!step.getColumn().isPresent() && step.getDependencies().stream().allMatch(s -> constantAttributes.contains(s))) {
+                constant.add(step);
+                constantAttributes.add(step.getAttribute());
+            }
+            else {
+                notConstant.add(step);
+            }
+        }
+
+        final Map<Boolean, List<Step<?>>> result = new HashMap<>();
+        result.put(false, notConstant);
+        result.put(true, constant);
+        return result;
     }
 
     private boolean hasMultipleDomains(List<Attribute<?>> attributes) {
         final String domain = attributes.get(0).getDomain();
         return attributes.stream().anyMatch(attr -> !attr.getDomain().equals(domain));
+    }
+
+    private List<Step<?>> injectConstants(Request request, List<Step<?>> steps) {
+        Map<String, SimpleExpression> equalityFilters = request.getCriteria().stream()
+                .filter(this::isEqualityExpression)
+                .collect(Collectors.toMap(SimpleExpression::getPropertyName, expr -> expr));
+
+        return steps.stream().map(step -> {
+            if (step.isConstant()) {
+                return step;
+            }
+
+            SimpleExpression filterExpression = equalityFilters.get(step.getAttribute().getProperty());
+            if (filterExpression != null) {
+                return new AddValuesFromFilter<>(step.getAttribute(), filterExpression);
+            }
+            else {
+                return step;
+            }
+        }).collect(Collectors.toList());
     }
 
     private List<Step<?>> findRequiredSelectors(Request request) {
@@ -61,7 +113,7 @@ public abstract class PlanBuilder {
         return request.getAttributes().stream().map(attr -> {
             SimpleExpression filterExpression = equalityFilters.get(attr.getProperty());
             if (filterExpression != null) {
-                return new FromFilterEnrichment<>(attr, filterExpression);
+                return new AddValuesFromFilter<>(attr, filterExpression);
             }
             else {
                 return attributeToSelector.get(attr);
@@ -87,12 +139,24 @@ public abstract class PlanBuilder {
         result.add(item);
 
         for (Attribute<?> dependency : item.getDependencies()) {
-            this.addDependency(result, attributeToSelector.get(dependency));
+            final Step<?> step = attributeToSelector.get(dependency);
+            if (step == null) {
+                throw new IllegalArgumentException("Inconsistent selector tree, a selector contains an dependency which doesn't exist: " + item + " requires " + dependency);
+            }
+
+            this.addDependency(result, step);
         }
     }
 
     private List<Step<?>> orderSelectorsByDependencies(List<Step<?>> steps) {
-        return TopologicalSort.INSTANCE.sort(steps, attributeToSelector);
+        final Map<Attribute, Step<?>> attributeToSelectorsWithConstants = new HashMap<>(attributeToSelector);
+        for (Step<?> step : steps) {
+            if (step.isConstant()) {
+                attributeToSelectorsWithConstants.put(step.getAttribute(), step);
+            }
+        }
+
+        return TopologicalSort.INSTANCE.sort(steps, attributeToSelectorsWithConstants);
     }
 
     private List<SimpleExpression> translatePropertyNames(String domain, List<SimpleExpression> criteria) {

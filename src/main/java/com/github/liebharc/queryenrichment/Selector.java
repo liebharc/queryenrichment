@@ -35,6 +35,11 @@ public class Selector<T> implements Step<T> {
     }
 
     @Override
+    public final boolean isConstant() {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return "Step{" +
                 "attribute=" + attribute +

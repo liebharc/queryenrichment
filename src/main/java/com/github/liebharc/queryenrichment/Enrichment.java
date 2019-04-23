@@ -32,4 +32,9 @@ public abstract class Enrichment<T> implements Step<T> {
     public Attribute<T> getAttribute() {
         return attribute;
     }
+
+    @Override
+    public boolean isConstant() {
+        return false;
+    }
 }

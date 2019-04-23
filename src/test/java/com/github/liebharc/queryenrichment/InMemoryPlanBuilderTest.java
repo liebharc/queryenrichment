@@ -1,6 +1,7 @@
 package com.github.liebharc.queryenrichment;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -8,6 +9,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class InMemoryPlanBuilderTest {
+
+    @Before
+    public void resetInMemoryDb() {
+        InMemoryQueryBuilder.database.clear();
+    }
 
     @Test(expected = IllegalArgumentException.class)
     public void invalidSelectorsTest() {

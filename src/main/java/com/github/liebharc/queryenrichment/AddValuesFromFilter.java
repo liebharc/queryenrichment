@@ -3,11 +3,11 @@ package com.github.liebharc.queryenrichment;
 import java.util.Collections;
 import java.util.List;
 
-public class FromFilterEnrichment<T> extends Enrichment<T> {
+public class AddValuesFromFilter<T> extends Enrichment<T> {
 
     private final SimpleExpression expression;
 
-    public FromFilterEnrichment(Attribute<T> attribute, SimpleExpression expression) {
+    public AddValuesFromFilter(Attribute<T> attribute, SimpleExpression expression) {
         super(attribute, NO_COLUMN);
         this.expression = expression;
     }
@@ -20,5 +20,10 @@ public class FromFilterEnrichment<T> extends Enrichment<T> {
     @Override
     public List<Attribute<?>> getDependencies() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public boolean isConstant() {
+        return true;
     }
 }

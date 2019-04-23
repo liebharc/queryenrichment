@@ -10,7 +10,9 @@ public class IntermediateResult {
 
     private int queryResultPos = 0;
 
-    private final Map<Attribute, Object> results = new HashMap<>();
+    private Map<Attribute, Object> results = new HashMap<>();
+
+    private Map<Attribute, Object> constants = new HashMap<>();
 
     public<T> void add(Step step, T result) {
         results.put(step.getAttribute(), result);
@@ -18,6 +20,11 @@ public class IntermediateResult {
 
     @SuppressWarnings("unchecked")
     public<T> T get(Attribute<T> attribute) {
+        final T constant = (T) constants.get(attribute);
+        if (constant != null) {
+            return constant;
+        }
+
         return (T)results.get(attribute);
     }
 
@@ -75,5 +82,10 @@ public class IntermediateResult {
     private void clear() {
         results.clear();
         queryResultPos = 0;
+    }
+
+    public void markCurrentResultAsConstant() {
+        constants = results;
+        results = new HashMap<>();
     }
 }
