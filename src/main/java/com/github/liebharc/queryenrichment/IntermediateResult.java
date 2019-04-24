@@ -16,9 +16,11 @@ public class IntermediateResult {
 
     private boolean continueProcessing = true;
 
-    public<T> void add(Step step, T result) {
+    public<T> void add(Step<T> step, T result) {
         results.put(step.getAttribute(), result);
     }
+
+    public<T> void add(Attribute<T> attribute, T result) { results.put(attribute, result); }
 
     @SuppressWarnings("unchecked")
     public<T> T get(Attribute<T> attribute) {
