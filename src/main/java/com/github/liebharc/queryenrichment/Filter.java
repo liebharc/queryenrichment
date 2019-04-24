@@ -1,15 +1,22 @@
 package com.github.liebharc.queryenrichment;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
-class Filter<T> implements Step<T> {
+abstract class Filter<T> implements Step<T> {
 
-    private final Step<T> innerStep;
-    private final SimpleExpression expression;
+    protected final Step<T> innerStep;
+    protected final SimpleExpression expression;
 
-    Filter(Step<T> innerStep, SimpleExpression expression) {
+     static<T> Filter<T> createFilter(Step<T> innerStep, SimpleExpression expression) {
+        if (!expression.getOperation().equals("=")) {
+            throw new IllegalArgumentException("Only equality is supported right now");
+        }
+
+        return new EqualityFilter<>(innerStep, expression);
+    }
+
+    protected Filter(Step<T> innerStep, SimpleExpression expression) {
         this.innerStep = innerStep;
         this.expression = expression;
     }
@@ -25,17 +32,7 @@ class Filter<T> implements Step<T> {
     }
 
     @Override
-    public void enrich(IntermediateResult result) {
-        innerStep.enrich(result);
-        final T value = result.get(this.getAttribute());
-        if (!expression.getOperation().equals("=")) {
-            throw new IllegalArgumentException("Only equality is supported right now");
-        }
-
-        if (!Objects.equals(value, expression.getValue())) {
-            result.stopProcessing();
-        }
-    }
+    public abstract void enrich(IntermediateResult result);
 
     @Override
     public List<Attribute<?>> getDependencies() {
@@ -45,5 +42,13 @@ class Filter<T> implements Step<T> {
     @Override
     public boolean isConstant() {
         return innerStep.isConstant();
+    }
+
+    @Override
+    public String toString() {
+        return "Filter{" +
+                "innerStep=" + innerStep +
+                ", expression=" + expression +
+                '}';
     }
 }

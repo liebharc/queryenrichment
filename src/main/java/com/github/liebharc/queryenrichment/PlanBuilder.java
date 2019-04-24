@@ -85,7 +85,7 @@ public abstract class PlanBuilder {
                 throw new IllegalArgumentException("Failed to find selector for expression " + expr);
             }
 
-            return new Filter<>(step, expr);
+            return Filter.createFilter(step, expr);
         }).collect(Collectors.toList());
     }
 
