@@ -30,10 +30,15 @@ public class Plan {
             final List<List<Object>> rows = queryResult.getRows();
             final List<Object[]> results = new ArrayList<>();
             final IntermediateResult intermediateResult = new IntermediateResult();
-            boolean isFirstRow = true;
+
+            // determine constants once at the beginning
+            if (this.processConstants(intermediateResult)) {
+                return new EnrichedQueryResult(attributes, results.toArray(new Object[0][]));
+            }
+
             for (int i = 0; i < rows.size(); i++) {
                 intermediateResult.nextRow(rows.get(i));
-                isFirstRow = this.processRow(results, intermediateResult, isFirstRow);
+                this.processRow(results, intermediateResult);
             }
 
             return new EnrichedQueryResult(attributes, results.toArray(new Object[0][]));
@@ -43,23 +48,23 @@ public class Plan {
         }
     }
 
-    private boolean processRow(List<Object[]> results, IntermediateResult intermediateResult, boolean isFirstRow) {
-        if (isFirstRow) {
-            // determine constants once
-            for (Step<?> step : constants) {
-                step.enrich(intermediateResult);
-                if (!intermediateResult.isContinueProcessing()) {
-                    return true;
-                }
+    private boolean processConstants(IntermediateResult intermediateResult) {
+        for (Step<?> step : constants) {
+            step.enrich(intermediateResult);
+            if (!intermediateResult.isContinueProcessing()) {
+                return true;
             }
-
-            intermediateResult.markCurrentResultAsConstant();
         }
 
+        intermediateResult.markCurrentResultAsConstant();
+        return false;
+    }
+
+    private void processRow(List<Object[]> results, IntermediateResult intermediateResult) {
         for (Step<?> step : steps) {
             step.enrich(intermediateResult);
             if (!intermediateResult.isContinueProcessing()) {
-                return false;
+                return;
             }
         }
 
@@ -71,7 +76,6 @@ public class Plan {
         }
 
         results.add(row);
-        return false;
     }
 
     List<Step<?>> getSteps() {
