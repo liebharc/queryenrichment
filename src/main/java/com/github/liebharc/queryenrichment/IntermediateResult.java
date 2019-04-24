@@ -3,6 +3,7 @@ package com.github.liebharc.queryenrichment;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class IntermediateResult {
 
@@ -30,6 +31,18 @@ public class IntermediateResult {
         }
 
         return (T)results.get(attribute);
+    }
+
+    @SuppressWarnings("unchecked")
+    public<T> T getOrCreate(Attribute<T> attribute, Supplier<T> onMissSupplier) {
+        final T result = this.get(attribute);
+        if (result != null) {
+            return result;
+        }
+
+        final T newInstance = onMissSupplier.get();
+        this.add(attribute, newInstance);
+        return newInstance;
     }
 
     public void addFromQuery(Step<?> step) {
