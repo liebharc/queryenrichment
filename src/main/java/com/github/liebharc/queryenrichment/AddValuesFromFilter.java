@@ -14,7 +14,7 @@ public class AddValuesFromFilter<T> extends Enrichment<T> {
 
     @Override
     public void enrich(IntermediateResult result) {
-        result.add(this, expression.getValue());
+        result.add(this, (T)expression.getValue());
     }
 
     @Override
