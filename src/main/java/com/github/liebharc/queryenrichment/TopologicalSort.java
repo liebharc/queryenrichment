@@ -30,8 +30,8 @@ public class TopologicalSort {
         else {
             visited.add(item);
 
-            List<Attribute<?>> dependencies = item.getDependencies();
-            for (Attribute dependency : dependencies) {
+            Dependency dependencies = item.getDependenciesCached();
+            for (Attribute<?> dependency : dependencies.getMinimalRequiredAttributes(visited)) {
                 Step<?> stepDependency = attributeToSelector.get(dependency);
                 if (stepDependency == null) {
                     throw new IllegalArgumentException("Unresolved dependency found. " + item + " requires " + dependency);

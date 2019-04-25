@@ -18,8 +18,8 @@ public class AddValuesFromFilter<T> extends Enrichment<T> {
     }
 
     @Override
-    public List<Attribute<?>> getDependencies() {
-        return Collections.emptyList();
+    public Dependency getDependencies() {
+        return Dependencies.noDependencies();
     }
 
     @Override

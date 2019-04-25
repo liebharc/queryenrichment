@@ -94,11 +94,11 @@ public abstract class PlanBuilder {
         final Set<Attribute<?>> constantAttributes = new HashSet<>();
         final List<Step<?>> notConstant = new ArrayList<>();
         for (Step<?> step : steps) {
-            if (step.isConstant() && step.getDependencies().isEmpty()) {
+            if (step.isConstant() && step.getDependenciesCached().isEmpty()) {
                 constant.add(step);
                 constantAttributes.add(step.getAttribute());
             }
-            else if (!step.getColumn().isPresent() && step.getDependencies().stream().allMatch(s -> constantAttributes.contains(s))) {
+            else if (!step.getColumn().isPresent() && step.getDependenciesCached().isOkay(constantAttributes)) {
                 constant.add(step);
                 constantAttributes.add(step.getAttribute());
             }
@@ -171,7 +171,7 @@ public abstract class PlanBuilder {
 
         result.add(item);
 
-        for (Attribute<?> dependency : item.getDependencies()) {
+        for (Attribute<?> dependency : item.getDependenciesCached().getMinimalRequiredAttributes(result)) {
             final Step<?> step = attributeToSelector.get(dependency);
             if (step == null) {
                 throw new IllegalArgumentException("Inconsistent selector tree, a selector contains an dependency which doesn't exist: " + item + " requires " + dependency);

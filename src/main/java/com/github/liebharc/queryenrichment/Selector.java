@@ -8,10 +8,12 @@ public class Selector<T> implements Step<T> {
 
     private final Attribute<T> attribute;
     private final String column;
+    private final Dependency dependency;
 
     public Selector(Attribute<T> attribute, String columnOrNull) {
         this.attribute = attribute;
         this.column = columnOrNull;
+        this.dependency = this.getDependencies();
     }
 
     @Override
@@ -30,8 +32,13 @@ public class Selector<T> implements Step<T> {
     }
 
     @Override
-    public List<Attribute<?>> getDependencies() {
-        return Collections.emptyList();
+    public Dependency getDependencies() {
+        return Dependencies.noDependencies();
+    }
+
+    @Override
+    public Dependency getDependenciesCached() {
+        return dependency;
     }
 
     @Override

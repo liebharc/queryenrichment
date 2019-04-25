@@ -57,6 +57,56 @@ public class InMemoryPlanBuilderTest {
     }
 
     @Test
+    public void optionalDependenciesTest() {
+        InMemoryQueryBuilder.database.add(new Student(10, "David", "Tenant"));
+        final List<Step<?>> steps =
+                Arrays.asList(
+                        InMemoryQueryBuilder.studentId,
+                        InMemoryQueryBuilder.firstName,
+                        InMemoryQueryBuilder.lastName,
+                        InMemoryQueryBuilder.fullName);
+
+        final PlanBuilder planBuilder = new InMemoryPlanBuilder(steps);
+
+        final Request request = new Request(
+                Arrays.asList(Attributes.studentId,
+                        Attributes.lastName,
+                        Attributes.fullName));
+        final Plan plan = planBuilder.build(
+                request);
+        final EnrichedQueryResult result = plan.execute(request);
+        Object[] firstRow = result.getResults()[0];
+        Assert.assertEquals("Tenant", firstRow[1]);
+        Assert.assertEquals("Tenant", firstRow[2]);
+    }
+
+    @Test
+    public void optionalDependenciesWithAllInputsTest() {
+        InMemoryQueryBuilder.database.add(new Student(10, "David", "Tenant"));
+        final List<Step<?>> steps =
+                Arrays.asList(
+                        InMemoryQueryBuilder.studentId,
+                        InMemoryQueryBuilder.firstName,
+                        InMemoryQueryBuilder.lastName,
+                        InMemoryQueryBuilder.fullName);
+
+        final PlanBuilder planBuilder = new InMemoryPlanBuilder(steps);
+
+        final Request request = new Request(
+                Arrays.asList(Attributes.studentId,
+                        Attributes.firstName,
+                        Attributes.lastName,
+                        Attributes.fullName));
+        final Plan plan = planBuilder.build(
+                request);
+        final EnrichedQueryResult result = plan.execute(request);
+        Object[] firstRow = result.getResults()[0];
+        Assert.assertEquals("David", firstRow[1]);
+        Assert.assertEquals("Tenant", firstRow[2]);
+        Assert.assertEquals("David Tenant", firstRow[3]);
+    }
+
+    @Test
     public void planCacheTest() {
         final List<Step<?>> steps = this.createDefaultSteps();
 
@@ -91,6 +141,7 @@ public class InMemoryPlanBuilderTest {
         return Arrays.asList(
                 InMemoryQueryBuilder.studentId,
                 InMemoryQueryBuilder.firstName,
-                InMemoryQueryBuilder.lastName);
+                InMemoryQueryBuilder.lastName,
+                InMemoryQueryBuilder.fullName);
     }
 }

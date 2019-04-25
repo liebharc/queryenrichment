@@ -20,8 +20,8 @@ public class H2QueryBuilder implements QueryBuilder {
         }
 
         @Override
-        public List<Attribute<?>> getDependencies() {
-            return Arrays.asList(Attributes.firstName, Attributes.lastName);
+        public Dependency getDependencies() {
+            return Dependencies.requireAll(Attributes.firstName, Attributes.lastName);
         }
     };
 
@@ -33,8 +33,8 @@ public class H2QueryBuilder implements QueryBuilder {
         }
 
         @Override
-        public List<Attribute<?>> getDependencies() {
-            return Arrays.asList(Attributes.studentClass);
+        public Dependency getDependencies() {
+            return Dependencies.require(Attributes.studentClass);
         }
     };
 

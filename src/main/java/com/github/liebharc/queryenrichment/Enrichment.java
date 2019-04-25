@@ -7,6 +7,7 @@ public abstract class Enrichment<T> implements Step<T> {
 
     private final Attribute<T> attribute;
     private final String column;
+    private final Dependency dependency;
 
     public Enrichment(Attribute<T> attribute) {
         this(attribute, null);
@@ -15,17 +16,23 @@ public abstract class Enrichment<T> implements Step<T> {
     public Enrichment(Attribute<T> attribute, String columnOrNull) {
         this.attribute = attribute;
         this.column = columnOrNull;
+        this.dependency = this.getDependencies();
     }
 
     @Override
     public abstract void enrich(IntermediateResult result);
 
     @Override
-    public abstract List<Attribute<?>> getDependencies();
+    public abstract Dependency getDependencies();
 
     @Override
     public final Optional<String> getColumn() {
         return Optional.ofNullable(column);
+    }
+
+    @Override
+    public Dependency getDependenciesCached() {
+        return dependency;
     }
 
     @Override

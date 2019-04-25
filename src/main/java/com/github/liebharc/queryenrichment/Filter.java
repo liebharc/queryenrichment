@@ -35,8 +35,13 @@ abstract class Filter<T> implements Step<T> {
     public abstract void enrich(IntermediateResult result);
 
     @Override
-    public List<Attribute<?>> getDependencies() {
+    public Dependency getDependencies() {
         return innerStep.getDependencies();
+    }
+
+    @Override
+    public Dependency getDependenciesCached() {
+        return innerStep.getDependenciesCached();
     }
 
     @Override
