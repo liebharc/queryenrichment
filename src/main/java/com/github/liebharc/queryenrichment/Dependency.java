@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 
 public interface Dependency {
-    Collection<Attribute<?>> getMinimalRequiredAttributes(Collection<Step<?>> available);
+    Collection<Attribute<?>> getMinimalRequiredAttributes(Collection<Attribute<?>> available);
 
     boolean isEmpty();
 

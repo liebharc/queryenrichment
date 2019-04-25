@@ -157,27 +157,30 @@ public abstract class PlanBuilder {
 
     private List<Step<?>> addDependencies(List<Step<?>> requiredSteps) {
         final List<Step<?>> result = new ArrayList<>();
+        final Set<Attribute<?>> availableAttributes =
+                requiredSteps.stream().map(step -> step.getAttribute()).collect(Collectors.toSet());
         for (Step<?> step : requiredSteps) {
-            this.addDependency(result, step);
+            this.addDependency(result, step, availableAttributes);
         }
 
         return result;
     }
 
-    private void addDependency(List<Step<?>> result, Step<?> item) {
+    private void addDependency(List<Step<?>> result, Step<?> item, Set<Attribute<?>> availableAttributes) {
         if (result.contains(item)) {
             return;
         }
 
         result.add(item);
+        availableAttributes.add(item.getAttribute());
 
-        for (Attribute<?> dependency : item.getDependenciesCached().getMinimalRequiredAttributes(result)) {
+        for (Attribute<?> dependency : item.getDependenciesCached().getMinimalRequiredAttributes(availableAttributes)) {
             final Step<?> step = attributeToSelector.get(dependency);
             if (step == null) {
                 throw new IllegalArgumentException("Inconsistent selector tree, a selector contains an dependency which doesn't exist: " + item + " requires " + dependency);
             }
 
-            this.addDependency(result, step);
+            this.addDependency(result, step, availableAttributes);
         }
     }
 

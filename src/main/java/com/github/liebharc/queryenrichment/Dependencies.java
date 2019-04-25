@@ -30,12 +30,12 @@ public class Dependencies {
         }
 
         @Override
-        public Collection<Attribute<?>> getMinimalRequiredAttributes(Collection<Step<?>> available) {
+        public Collection<Attribute<?>> getMinimalRequiredAttributes(Collection<Attribute<?>> available) {
             if (this.isEmpty()) {
                 return Collections.emptyList();
             }
 
-            final Optional<Attribute<?>> any = attributes.stream().filter(req -> available.stream().anyMatch(a -> a.getAttribute().equals(req))).findAny();
+            final Optional<Attribute<?>> any = attributes.stream().filter(req -> available.contains(req)).findAny();
             if (any.isPresent()) {
                 return Collections.singletonList(any.get());
             } else {
@@ -71,7 +71,7 @@ public class Dependencies {
         }
 
         @Override
-        public Collection<Attribute<?>> getMinimalRequiredAttributes(Collection<Step<?>> available) {
+        public Collection<Attribute<?>> getMinimalRequiredAttributes(Collection<Attribute<?>> available) {
             return this.attributes;
         }
 
@@ -89,7 +89,7 @@ public class Dependencies {
     private static class NoDependency implements Dependency {
 
         @Override
-        public Collection<Attribute<?>> getMinimalRequiredAttributes(Collection<Step<?>> available) {
+        public Collection<Attribute<?>> getMinimalRequiredAttributes(Collection<Attribute<?>> available) {
             return Collections.emptyList();
         }
 
