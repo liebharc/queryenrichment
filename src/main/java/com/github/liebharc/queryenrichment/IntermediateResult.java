@@ -1,5 +1,6 @@
 package com.github.liebharc.queryenrichment;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,45 +47,45 @@ public class IntermediateResult {
     }
 
     public void addFromQuery(Step<?> step) {
-        // Plan builder ensures that we can rely on the query result position here
         Attribute<?> attribute = step.getAttribute();
-        results.put(attribute, this.cast(attribute.getAttributeClass(), queryResult.get(queryResultPos)));
+        results.put(attribute, ClassCasts.cast(step.getAttribute().getAttributeClass(), queryResult.get(queryResultPos)));
         this.nextColumn();
     }
 
-    /**
-     * Cast the value to the given class. Also supports the most crucial widening primitive conversions.
-     */
-    private Object cast(Class<?> clazz, Object value) {
-        if (clazz == Long.class) {
-            if (value instanceof Long) {
-                return value;
-            }
+    public void addLongFromQuery(Step<Long> step) {
+        Attribute<Long> attribute = step.getAttribute();
+        results.put(attribute, ClassCasts.castLong(queryResult.get(queryResultPos)));
+        this.nextColumn();
+    }
 
-            if (value instanceof Integer) {
-                return (long) ((int) value);
-            }
+    public void addIntegerFromQuery(Step<Integer> step) {
+        Attribute<Integer> attribute = step.getAttribute();
+        results.put(attribute, ClassCasts.castInteger(queryResult.get(queryResultPos)));
+        this.nextColumn();
+    }
 
-            if (value instanceof Short) {
-                return (long) ((short) value);
-            }
-        }
+    public void addShortFromQuery(Step<Short> step) {
+        Attribute<Short> attribute = step.getAttribute();
+        results.put(attribute, ClassCasts.castShort(queryResult.get(queryResultPos)));
+        this.nextColumn();
+    }
 
-        if (clazz == Integer.class) {
-            if (value instanceof Integer) {
-                return value;
-            }
+    public void addBooleanFromQuery(Step<Boolean> step) {
+        Attribute<Boolean> attribute = step.getAttribute();
+        results.put(attribute, ClassCasts.castBoolean(queryResult.get(queryResultPos)));
+        this.nextColumn();
+    }
 
-            if (value instanceof Short) {
-                return (int) ((short) value);
-            }
-        }
+    public void addFloatFromQuery(Step<Float> step) {
+        Attribute<Float> attribute = step.getAttribute();
+        results.put(attribute, ClassCasts.castFloat(queryResult.get(queryResultPos)));
+        this.nextColumn();
+    }
 
-        if (clazz == Double.class && value instanceof Float) {
-            return (double)((float)value);
-        }
-
-        return clazz.cast(value);
+    public void addDoubleFromQuery(Step<Double> step) {
+        Attribute<Double> attribute = step.getAttribute();
+        results.put(attribute, ClassCasts.castDouble(queryResult.get(queryResultPos)));
+        this.nextColumn();
     }
 
     private void nextColumn() {
