@@ -1,6 +1,5 @@
 package com.github.liebharc.queryenrichment;
 
-import java.util.List;
 import java.util.Optional;
 
 public abstract class Enrichment<T> implements Step<T> {
@@ -9,21 +8,18 @@ public abstract class Enrichment<T> implements Step<T> {
     private final String column;
     private final Dependency dependency;
 
-    public Enrichment(Attribute<T> attribute) {
-        this(attribute, null);
+    public Enrichment(Attribute<T> attribute, Dependency dependency) {
+        this(attribute, null, dependency);
     }
 
-    public Enrichment(Attribute<T> attribute, String columnOrNull) {
+    public Enrichment(Attribute<T> attribute, String columnOrNull, Dependency dependency) {
         this.attribute = attribute;
         this.column = columnOrNull;
-        this.dependency = this.getDependencies();
+        this.dependency = dependency;
     }
 
     @Override
     public abstract void enrich(IntermediateResult result);
-
-    @Override
-    public abstract Dependency getDependencies();
 
     @Override
     public final Optional<String> getColumn() {
@@ -31,7 +27,7 @@ public abstract class Enrichment<T> implements Step<T> {
     }
 
     @Override
-    public Dependency getDependenciesCached() {
+    public Dependency getDependencies() {
         return dependency;
     }
 

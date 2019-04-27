@@ -1,6 +1,5 @@
 package com.github.liebharc.queryenrichment;
 
-import java.util.List;
 import java.util.Optional;
 
 abstract class Filter<T> implements Step<T> {
@@ -37,11 +36,6 @@ abstract class Filter<T> implements Step<T> {
     @Override
     public Dependency getDependencies() {
         return innerStep.getDependencies();
-    }
-
-    @Override
-    public Dependency getDependenciesCached() {
-        return innerStep.getDependenciesCached();
     }
 
     @Override

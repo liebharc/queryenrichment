@@ -5,7 +5,7 @@ package com.github.liebharc.queryenrichment;
  * @param <T> Attribute type
  */
 public class PropertySelector<T> extends Selector<T> {
-    public PropertySelector(Attribute<T> attribute) {
-        super(attribute, attribute.getProperty());
+    public PropertySelector(Attribute<T> attribute, Dependency dependency) {
+        super(attribute, attribute.getProperty(), dependency);
     }
 }

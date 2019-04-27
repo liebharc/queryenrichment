@@ -11,7 +11,7 @@ public class InMemoryQueryBuilder implements QueryBuilder {
     public static final Step<Long> studentId = new SelectorBuilder<>(Attributes.studentId).addColumn("ID").build();
     public static final Step<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("FIRST_NAME").build();
     public static final Step<String> lastName = new SelectorBuilder<>(Attributes.lastName).addColumn("LAST_NAME").build();
-    public static final Step<String> fullName = new Enrichment<String>(Attributes.fullName) {
+    public static final Step<String> fullName = new Enrichment<String>(Attributes.fullName, Dependencies.requireOneOf(Attributes.firstName, Attributes.lastName)) {
         @Override
         public void enrich(IntermediateResult result) {
             final String firstName = result.get(Attributes.firstName);
@@ -25,11 +25,6 @@ public class InMemoryQueryBuilder implements QueryBuilder {
             } else {
                 throw new RuntimeException("At least one of firstName and lastName must be available");
             }
-        }
-
-        @Override
-        public Dependency getDependencies() {
-            return Dependencies.requireOneOf(Attributes.firstName, Attributes.lastName);
         }
     };
 

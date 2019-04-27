@@ -8,18 +8,13 @@ public class AddValuesFromFilter<T> extends Enrichment<T> {
     private final SimpleExpression expression;
 
     public AddValuesFromFilter(Attribute<T> attribute, SimpleExpression expression) {
-        super(attribute, NO_COLUMN);
+        super(attribute, NO_COLUMN, Dependencies.noDependencies());
         this.expression = expression;
     }
 
     @Override
     public void enrich(IntermediateResult result) {
         result.add(this, (T)expression.getValue());
-    }
-
-    @Override
-    public Dependency getDependencies() {
-        return Dependencies.noDependencies();
     }
 
     @Override

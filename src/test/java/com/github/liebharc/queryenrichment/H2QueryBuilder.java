@@ -13,28 +13,18 @@ public class H2QueryBuilder implements QueryBuilder {
     public static final Step<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("FIRST_NAME").build();
     public static final Step<String> lastName = new SelectorBuilder<>(Attributes.lastName).addColumn("LAST_NAME").build();
     public static final Step<Long> studentClass = new SelectorBuilder<>(Attributes.studentClass).addColumn("CLASS").build();
-    public static final Step<String> fullName = new Enrichment<String>(Attributes.fullName) {
+    public static final Step<String> fullName = new Enrichment<String>(Attributes.fullName, Dependencies.requireAll(Attributes.firstName, Attributes.lastName)) {
         @Override
         public void enrich(IntermediateResult result) {
             result.add(this, result.get(Attributes.firstName) + " " + result.get(Attributes.lastName));
         }
-
-        @Override
-        public Dependency getDependencies() {
-            return Dependencies.requireAll(Attributes.firstName, Attributes.lastName);
-        }
     };
 
-    public static final Step<String> classIdString = new Enrichment<String>(Attributes.classIdString) {
+    public static final Step<String> classIdString = new Enrichment<String>(Attributes.classIdString, Dependencies.require(Attributes.studentClass)) {
         @Override
         public void enrich(IntermediateResult result) {
             classIdStringCalls++;
             result.add(this, "Class: " + result.get(Attributes.studentClass));
-        }
-
-        @Override
-        public Dependency getDependencies() {
-            return Dependencies.require(Attributes.studentClass);
         }
     };
 

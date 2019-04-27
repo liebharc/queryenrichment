@@ -1,7 +1,5 @@
 package com.github.liebharc.queryenrichment;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 public class Selector<T> implements Step<T> {
@@ -11,9 +9,13 @@ public class Selector<T> implements Step<T> {
     private final Dependency dependency;
 
     public Selector(Attribute<T> attribute, String columnOrNull) {
+       this(attribute, columnOrNull, Dependencies.noDependencies());
+    }
+
+    public Selector(Attribute<T> attribute, String columnOrNull, Dependency dependency) {
         this.attribute = attribute;
         this.column = columnOrNull;
-        this.dependency = this.getDependencies();
+        this.dependency = dependency;
     }
 
     @Override
@@ -33,11 +35,6 @@ public class Selector<T> implements Step<T> {
 
     @Override
     public Dependency getDependencies() {
-        return Dependencies.noDependencies();
-    }
-
-    @Override
-    public Dependency getDependenciesCached() {
         return dependency;
     }
 

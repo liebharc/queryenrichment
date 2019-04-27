@@ -15,7 +15,5 @@ public interface Step<T> {
 
     Dependency getDependencies();
 
-    Dependency getDependenciesCached();
-
     boolean isConstant();
 }
