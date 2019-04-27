@@ -1,13 +1,12 @@
 package com.github.liebharc.queryenrichment;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 
 /**
  * Represents the dependencies of a step.
  */
-public interface Dependency extends Serializable {
+public interface Dependency {
     /**
      * Given a list of attributes which are already available the dependency has to return the minimal set
      * of attributes it requires so that the step can be executed.

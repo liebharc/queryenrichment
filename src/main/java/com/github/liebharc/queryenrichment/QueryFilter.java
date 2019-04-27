@@ -21,14 +21,6 @@ public class QueryFilter implements Serializable {
         this.column = column;
     }
 
-    public SimpleExpression getExpression() {
-        return filter;
-    }
-
-    public String getColumn() {
-        return column;
-    }
-
     /**
      * Creates a SQL query expression with a placeholder value (e.g. "ID = ?").
      */

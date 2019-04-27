@@ -47,7 +47,7 @@ public class Dependencies {
                 return Collections.emptyList();
             }
 
-            final Optional<Attribute<?>> any = attributes.stream().filter(req -> available.contains(req)).findAny();
+            final Optional<Attribute<?>> any = attributes.stream().filter(available::contains).findAny();
             if (any.isPresent()) {
                 return Collections.singletonList(any.get());
             } else {
@@ -68,7 +68,7 @@ public class Dependencies {
                 return true;
             }
 
-            return this.attributes.stream().anyMatch(req -> available.contains(req));
+            return this.attributes.stream().anyMatch(available::contains);
         }
     }
 
@@ -78,7 +78,6 @@ public class Dependencies {
         private final Collection<Attribute<?>> attributes;
 
         private RequireAll(Collection<Attribute<?>> attributes) {
-
             this.attributes = attributes;
         }
 
@@ -94,7 +93,7 @@ public class Dependencies {
 
         @Override
         public boolean isOkay(Set<Attribute<?>> available) {
-            return this.attributes.stream().allMatch(req -> available.contains(req));
+            return available.containsAll(this.attributes);
         }
     }
 

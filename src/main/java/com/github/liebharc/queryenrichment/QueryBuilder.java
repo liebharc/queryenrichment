@@ -12,5 +12,5 @@ public interface QueryBuilder {
      * @param filters FilterStep or where expression
      * @return Query object
      */
-    Query build(List<Step<?>> steps, List<QueryFilter> filters);
+    Query build(List<? extends Step<?>> steps, List<QueryFilter> filters);
 }

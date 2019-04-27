@@ -3,15 +3,17 @@ package com.github.liebharc.queryenrichment;
 import java.util.Optional;
 
 /** A step which executes a filter expression in Java */
-abstract class FilterStep<T> implements Step<T> {
+abstract class FilterStep<TAttribute, TParameter> implements ExecutableStep<TAttribute, TParameter> {
 
     private static final long serialVersionUID = 5894332892548243458L;
     /** The step which produces the attribute we have to filter for */
-    protected final Step<T> innerStep;
+    protected final ExecutableStep<TAttribute, TParameter> innerStep;
     /** The filter expression */
     protected final SimpleExpression expression;
 
-    static<T> FilterStep<T> createFilter(Step<T> innerStep, SimpleExpression expression) {
+    static<TAttribute, TParameter> FilterStep<TAttribute, TParameter> createFilter(
+            ExecutableStep<TAttribute, TParameter> innerStep,
+            SimpleExpression expression) {
         if (!expression.getOperation().equals("=")) {
             throw new IllegalArgumentException("Only equality is supported right now");
         }
@@ -19,7 +21,7 @@ abstract class FilterStep<T> implements Step<T> {
         return new EqualityFilter<>(innerStep, expression);
     }
 
-    protected FilterStep(Step<T> innerStep, SimpleExpression expression) {
+    protected FilterStep(ExecutableStep<TAttribute, TParameter> innerStep, SimpleExpression expression) {
         this.innerStep = innerStep;
         this.expression = expression;
     }
@@ -30,12 +32,12 @@ abstract class FilterStep<T> implements Step<T> {
     }
 
     @Override
-    public Attribute<T> getAttribute() {
+    public Attribute<TAttribute> getAttribute() {
         return innerStep.getAttribute();
     }
 
     @Override
-    public abstract void enrich(IntermediateResult result);
+    public abstract void enrich(IntermediateResult result, TParameter parameter);
 
     @Override
     public Dependency getDependencies() {

@@ -8,13 +8,13 @@ import java.util.List;
  * A plan holds an execution plan which consists of a query and steps. It allows to execute the plan which results
  * in a {@link EnrichedQueryResult}.
  */
-public class Plan {
+public class Plan<TParameter> {
     /** Ordered list of attributes which are queried */
     private final List<Attribute<?>> attributes;
     /** Ordered list of constant steps */
-    private final List<Step<?>> constants;
+    private final List<ExecutableStep<?, TParameter>> constants;
     /** Ordered list of per row steps */
-    private final List<Step<?>> steps;
+    private final List<ExecutableStep<?, TParameter>> steps;
     /** Query for this plan */
     private final Query query;
     /** Execution statistics */
@@ -22,8 +22,8 @@ public class Plan {
 
     public Plan(
             List<Attribute<?>> attributes,
-            List<Step<?>> constants,
-            List<Step<?>> steps,
+            List<ExecutableStep<?, TParameter>> constants,
+            List<ExecutableStep<?, TParameter>> steps,
             Query query) {
         this.attributes = attributes;
         this.constants = constants;
@@ -32,6 +32,10 @@ public class Plan {
     }
 
     public EnrichedQueryResult execute(Request request) {
+        return this.execute(request, null);
+    }
+
+    public EnrichedQueryResult execute(Request request, TParameter parameter) {
         long start = System.currentTimeMillis();
         try {
             final QueryResult queryResult = query.query(request);
@@ -41,13 +45,13 @@ public class Plan {
             final IntermediateResult intermediateResult = new IntermediateResult();
 
             // determine constants once at the beginning
-            if (this.processConstants(intermediateResult)) {
+            if (this.processConstants(intermediateResult, parameter)) {
                 return new EnrichedQueryResult(attributes, results.toArray(new Object[0][]));
             }
 
-            for (int i = 0; i < rows.size(); i++) {
-                intermediateResult.nextRow(rows.get(i));
-                if (this.processRow(intermediateResult)) {
+            for (List<Object> row : rows) {
+                intermediateResult.nextRow(row);
+                if (this.processRow(intermediateResult, parameter)) {
                     results.add(this.storeResultInObjectArray(intermediateResult));
                 }
             }
@@ -62,9 +66,9 @@ public class Plan {
     /**
      * Executes all constants steps and then marks the result as constant.
      */
-    private boolean processConstants(IntermediateResult intermediateResult) {
-        for (Step<?> step : constants) {
-            step.enrich(intermediateResult);
+    private boolean processConstants(IntermediateResult intermediateResult, TParameter parameter) {
+        for (ExecutableStep<?, TParameter> step : constants) {
+            step.enrich(intermediateResult, parameter);
             if (!intermediateResult.isContinueProcessing()) {
                 return true;
             }
@@ -77,9 +81,9 @@ public class Plan {
     /**
      * Processes all per row steps. Returns false if the row should be filtered out.
      */
-    private boolean processRow(IntermediateResult intermediateResult) {
-        for (Step<?> step : steps) {
-            step.enrich(intermediateResult);
+    private boolean processRow(IntermediateResult intermediateResult, TParameter parameter) {
+        for (ExecutableStep<?, TParameter> step : steps) {
+            step.enrich(intermediateResult, parameter);
             if (!intermediateResult.isContinueProcessing()) {
                 return false;
             }
@@ -94,7 +98,7 @@ public class Plan {
     private Object[] storeResultInObjectArray(IntermediateResult intermediateResult) {
         int pos = 0;
         Object[] row = new Object[attributes.size()];
-        for (Attribute attribute : attributes) {
+        for (Attribute<?> attribute : attributes) {
             row[pos] = intermediateResult.get(attribute);
             pos++;
         }
@@ -102,7 +106,7 @@ public class Plan {
         return row;
     }
 
-    List<Step<?>> getSteps() {
+    List<? extends Step<?>> getSteps() {
         return steps;
     }
 }

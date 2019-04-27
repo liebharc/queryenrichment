@@ -7,16 +7,16 @@ import java.util.stream.Collectors;
  * Creates a plan for a query. This class is intended to be subclassed so that implementors can provide their
  * query builder.
  */
-public abstract class PlanBuilder {
+public abstract class PlanBuilder<TParameter> {
     /** Maps attributes to the step which creates that attribute */
-    private final Map<Attribute<?>, Step<?>> attributeToStep = new HashMap<>();
+    private final Map<Attribute<?>, ExecutableStep<?, TParameter>> attributeToStep = new HashMap<>();
 
-    public PlanBuilder(List<Step<?>> steps) {
+    public PlanBuilder(List<ExecutableStep<?, TParameter>> steps) {
 
         // Create lookup tables and check steps
         final StringBuilder errorBuilder = new StringBuilder(0);
-        for (Step<?> step : steps) {
-            Step<?> previousMapping= this.attributeToStep.put(step.getAttribute(), step);
+        for (ExecutableStep<?, TParameter> step : steps) {
+            final ExecutableStep<?, TParameter> previousMapping= this.attributeToStep.put(step.getAttribute(), step);
 
             if (previousMapping != null) {
                 errorBuilder.append(step.getAttribute())
@@ -41,25 +41,25 @@ public abstract class PlanBuilder {
         }
 
         final Map<Boolean, List<SimpleExpression>> groupedByQueryFilter = this.groupByQueryFilter(request.getCriteria());
-        final List<Step<?>> filterSteps =
+        final List<ExecutableStep<?, TParameter>> filterSteps =
                 this.addDependencies(
                         this.createFilterSteps(
                                 groupedByQueryFilter.getOrDefault(false, Collections.emptyList())));
         List<SimpleExpression> sqlQueryExpressions = groupedByQueryFilter.getOrDefault(true, Collections.emptyList());
-        final List<Step<?>> allRequiredSteps =
+        final List<ExecutableStep<?, TParameter>> allRequiredSteps =
                 this.addStepsForFilters(filterSteps,
                     this.injectConstants(sqlQueryExpressions,
                         this.addDependencies(
                             this.findRequiredSteps(sqlQueryExpressions, request))));
-        final List<Step<?>> orderedSteps = this.orderSelectorsByDependencies(allRequiredSteps);
+        final List<ExecutableStep<?, TParameter>> orderedSteps = this.orderSelectorsByDependencies(allRequiredSteps);
         final List<QueryFilter> filters =
                 this.translatePropertyNames(
                         groupedByQueryFilter.getOrDefault(true, Collections.emptyList()));
-        final List<Step<?>> queryColumns =
+        final List<ExecutableStep<?, TParameter>> queryColumns =
                 orderedSteps.stream()
                         .filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
-        final Map<Boolean, List<Step<?>>> groupedByConstant = this.groupByConstant(orderedSteps);
-        return new Plan(
+        final Map<Boolean, List<ExecutableStep<?, TParameter>>> groupedByConstant = this.groupByConstant(orderedSteps);
+        return new Plan<>(
                 request.getAttributes(),
                 groupedByConstant.get(true),
                 groupedByConstant.get(false),
@@ -69,10 +69,10 @@ public abstract class PlanBuilder {
     /**
      * Joins the lists of selector/enrichment and filter steps.
      */
-    private List<Step<?>> addStepsForFilters(List<Step<?>> filterSteps, List<Step<?>> requiredSelectors) {
-        final List<Step<?>> result = new ArrayList<>(filterSteps.size() + requiredSelectors.size());
+    private List<ExecutableStep<?, TParameter>> addStepsForFilters(List<ExecutableStep<?, TParameter>> filterSteps, List<ExecutableStep<?, TParameter>> requiredSelectors) {
+        final List<ExecutableStep<?, TParameter>> result = new ArrayList<>(filterSteps.size() + requiredSelectors.size());
         result.addAll(filterSteps);
-        for (Step<?> selector : requiredSelectors) {
+        for (ExecutableStep<?, TParameter> selector : requiredSelectors) {
             if (!result.contains(selector)) {
                 result.add(selector);
             }
@@ -84,9 +84,9 @@ public abstract class PlanBuilder {
     /**
      * Creates Java filters for the given filter expressions.
      */
-    private List<Step<?>> createFilterSteps(List<SimpleExpression> javaFilters) {
+    private List<ExecutableStep<?, TParameter>> createFilterSteps(List<SimpleExpression> javaFilters) {
         return javaFilters.stream().map(expr -> {
-            final Step<?> step = attributeToStep.get(expr.getAttribute());
+            final ExecutableStep<?, TParameter> step = attributeToStep.get(expr.getAttribute());
             if (step == null) {
                 throw new IllegalArgumentException("Failed to find selector for expression " + expr);
             }
@@ -98,11 +98,11 @@ public abstract class PlanBuilder {
     /**
      * Groups the given list of steps in constant/not-constant.
      */
-    private Map<Boolean, List<Step<?>>> groupByConstant(List<Step<?>> steps) {
-        final List<Step<?>> constant = new ArrayList<>();
+    private Map<Boolean, List<ExecutableStep<?, TParameter>>> groupByConstant(List<ExecutableStep<?, TParameter>> steps) {
+        final List<ExecutableStep<?, TParameter>> constant = new ArrayList<>();
         final Set<Attribute<?>> constantAttributes = new HashSet<>();
-        final List<Step<?>> notConstant = new ArrayList<>();
-        for (Step<?> step : steps) {
+        final List<ExecutableStep<?, TParameter>> notConstant = new ArrayList<>();
+        for (ExecutableStep<?, TParameter> step : steps) {
             if (step.isConstant() && step.getDependencies().isEmpty()) {
                 constant.add(step);
                 constantAttributes.add(step.getAttribute());
@@ -116,7 +116,7 @@ public abstract class PlanBuilder {
             }
         }
 
-        final Map<Boolean, List<Step<?>>> result = new HashMap<>();
+        final Map<Boolean, List<ExecutableStep<?, TParameter>>> result = new HashMap<>();
         result.put(false, notConstant);
         result.put(true, constant);
         return result;
@@ -125,7 +125,7 @@ public abstract class PlanBuilder {
     /**
      * Replaces steps by constants where possible.
      */
-    private List<Step<?>> injectConstants(List<SimpleExpression> queryFilters, List<Step<?>> steps) {
+    private List<ExecutableStep<?, TParameter>> injectConstants(List<SimpleExpression> queryFilters, List<ExecutableStep<?, TParameter>> steps) {
         Map<Attribute<?>, SimpleExpression> equalityFilters = queryFilters.stream()
                 .filter(this::isEqualityExpression)
                 .collect(Collectors.toMap(SimpleExpression::getAttribute, expr -> expr));
@@ -135,9 +135,9 @@ public abstract class PlanBuilder {
                 return step;
             }
 
-            SimpleExpression filterExpression = equalityFilters.get(step.getAttribute());
+            final SimpleExpression filterExpression = equalityFilters.get(step.getAttribute());
             if (filterExpression != null) {
-                return new AddValuesFromFilter<>(step.getAttribute(), filterExpression);
+                return AddValuesFromFilter.<TParameter>create(step.getAttribute(), filterExpression);
             }
             else {
                 return step;
@@ -148,7 +148,7 @@ public abstract class PlanBuilder {
     /**
      * Find the required steps to implement the given list of filters in Java.
      */
-    private List<Step<?>> findRequiredSteps(List<SimpleExpression> queryExpressions, Request request) {
+    private List<ExecutableStep<?, TParameter>> findRequiredSteps(List<SimpleExpression> queryExpressions, Request request) {
         Map<Attribute<?>, SimpleExpression> equalityFilters = queryExpressions.stream()
                 .filter(this::isEqualityExpression)
                 .collect(Collectors.toMap(SimpleExpression::getAttribute, expr -> expr));
@@ -156,7 +156,7 @@ public abstract class PlanBuilder {
         return request.getAttributes().stream().map(attr -> {
             SimpleExpression filterExpression = equalityFilters.get(attr);
             if (filterExpression != null) {
-                return new AddValuesFromFilter<>(attr, filterExpression);
+                return AddValuesFromFilter.<TParameter>create(attr, filterExpression);
             }
             else {
                 return attributeToStep.get(attr);
@@ -167,11 +167,11 @@ public abstract class PlanBuilder {
     /**
      * Adds the dependencies for all steps.
      */
-    private List<Step<?>> addDependencies(List<Step<?>> requiredSteps) {
-        final List<Step<?>> result = new ArrayList<>();
+    private List<ExecutableStep<?, TParameter>> addDependencies(List<ExecutableStep<?, TParameter>> requiredSteps) {
+        final List<ExecutableStep<?, TParameter>> result = new ArrayList<>();
         final Set<Attribute<?>> availableAttributes =
-                requiredSteps.stream().map(step -> step.getAttribute()).collect(Collectors.toSet());
-        for (Step<?> step : requiredSteps) {
+                requiredSteps.stream().map(Step::getAttribute).collect(Collectors.toSet());
+        for (ExecutableStep<?, TParameter> step : requiredSteps) {
             this.addDependency(result, step, availableAttributes);
         }
 
@@ -181,7 +181,7 @@ public abstract class PlanBuilder {
     /**
      * Adds the dependencies for a step.
      */
-    private void addDependency(List<Step<?>> result, Step<?> item, Set<Attribute<?>> availableAttributes) {
+    private void addDependency(List<ExecutableStep<?, TParameter>> result, ExecutableStep<?, TParameter> item, Set<Attribute<?>> availableAttributes) {
         if (result.contains(item)) {
             return;
         }
@@ -190,7 +190,7 @@ public abstract class PlanBuilder {
         availableAttributes.add(item.getAttribute());
 
         for (Attribute<?> dependency : item.getDependencies().getMinimalRequiredAttributes(availableAttributes)) {
-            final Step<?> step = attributeToStep.get(dependency);
+            final ExecutableStep<?, TParameter> step = attributeToStep.get(dependency);
             if (step == null) {
                 throw new IllegalArgumentException("Inconsistent selector tree, a selector contains an dependency which doesn't exist: " + item + " requires " + dependency);
             }
@@ -202,9 +202,9 @@ public abstract class PlanBuilder {
     /**
      * Creates a linear execution plan for given list of steps.
      */
-    private List<Step<?>> orderSelectorsByDependencies(List<Step<?>> steps) {
-        final Map<Attribute<?>, Step<?>> attributeToSelectorsWithConstants = new HashMap<>(attributeToStep);
-        for (Step<?> step : steps) {
+    private List<ExecutableStep<?, TParameter>> orderSelectorsByDependencies(List<ExecutableStep<?, TParameter>> steps) {
+        final Map<Attribute<?>, ExecutableStep<?, TParameter>> attributeToSelectorsWithConstants = new HashMap<>(attributeToStep);
+        for (ExecutableStep<?, TParameter> step : steps) {
             if (step.isConstant()) {
                 attributeToSelectorsWithConstants.put(step.getAttribute(), step);
             }

@@ -4,31 +4,31 @@ import java.util.Optional;
 
 /**
  * An enrichment produces results by combining values from other attributes and/or other data sources.
- * @param <T> Attribute type
+ * @param <TAttribute> Attribute type
  */
-public abstract class Enrichment<T> implements Step<T> {
+public abstract class Enrichment<TAttribute, TParameter> implements ExecutableStep<TAttribute, TParameter> {
 
     private static final long serialVersionUID = -387954492411088733L;
 
     /** The attribute which is set by this step */
-    private final Attribute<T> attribute;
+    private final Attribute<TAttribute> attribute;
     /** Optional: Query column, most sof the time this value should be null as most enrichment don't directly query */
     private final String column;
     /** Dependencies of this step */
     private final Dependency dependency;
 
-    public Enrichment(Attribute<T> attribute, Dependency dependency) {
+    public Enrichment(Attribute<TAttribute> attribute, Dependency dependency) {
         this(attribute, null, dependency);
     }
 
-    public Enrichment(Attribute<T> attribute, String columnOrNull, Dependency dependency) {
+    public Enrichment(Attribute<TAttribute> attribute, String columnOrNull, Dependency dependency) {
         this.attribute = attribute;
         this.column = columnOrNull;
         this.dependency = dependency;
     }
 
     @Override
-    public abstract void enrich(IntermediateResult result);
+    public abstract void enrich(IntermediateResult result, TParameter parameter);
 
     @Override
     public final Optional<String> getColumn() {
@@ -41,7 +41,7 @@ public abstract class Enrichment<T> implements Step<T> {
     }
 
     @Override
-    public Attribute<T> getAttribute() {
+    public Attribute<TAttribute> getAttribute() {
         return attribute;
     }
 

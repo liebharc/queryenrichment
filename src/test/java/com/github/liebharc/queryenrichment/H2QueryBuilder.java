@@ -13,14 +13,14 @@ public class H2QueryBuilder implements QueryBuilder {
     public static final Step<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("FIRST_NAME").build();
     public static final Step<String> lastName = new SelectorBuilder<>(Attributes.lastName).addColumn("LAST_NAME").build();
     public static final Step<Long> studentClass = new SelectorBuilder<>(Attributes.studentClass).addColumn("CLASS").build();
-    public static final Step<String> fullName = new Enrichment<String>(Attributes.fullName, Dependencies.requireAll(Attributes.firstName, Attributes.lastName)) {
+    public static final Step<String> fullName = new ParameterlessEnrichment<String>(Attributes.fullName, Dependencies.requireAll(Attributes.firstName, Attributes.lastName)) {
         @Override
         public void enrich(IntermediateResult result) {
             result.add(this, result.get(Attributes.firstName) + " " + result.get(Attributes.lastName));
         }
     };
 
-    public static final Step<String> classIdString = new Enrichment<String>(Attributes.classIdString, Dependencies.require(Attributes.studentClass)) {
+    public static final Step<String> classIdString = new ParameterlessEnrichment<String>(Attributes.classIdString, Dependencies.require(Attributes.studentClass)) {
         @Override
         public void enrich(IntermediateResult result) {
             classIdStringCalls++;
@@ -35,7 +35,7 @@ public class H2QueryBuilder implements QueryBuilder {
     }
 
     @Override
-    public com.github.liebharc.queryenrichment.Query build(List<Step<?>> steps, List<QueryFilter> filters) {
+    public com.github.liebharc.queryenrichment.Query build(List<? extends Step<?>> steps, List<QueryFilter> filters) {
         final String select = this.createSelectStatement(steps);
         final StringBuilder query = new StringBuilder();
         query.append("SELECT ");
@@ -55,7 +55,7 @@ public class H2QueryBuilder implements QueryBuilder {
         }
     }
 
-    private String createSelectStatement(List<Step<?>> steps) {
+    private String createSelectStatement(List<? extends Step<?>> steps) {
         if (steps.isEmpty()) {
             return "1";
         }
@@ -74,9 +74,9 @@ public class H2QueryBuilder implements QueryBuilder {
     private class Query implements com.github.liebharc.queryenrichment.Query {
 
         private final PreparedStatement query;
-        private final List<Step<?>> steps;
+        private final List<? extends Step<?>> steps;
 
-        Query(PreparedStatement query, List<Step<?>> steps) {
+        Query(PreparedStatement query, List<? extends Step<?>> steps) {
             this.query = query;
             this.steps = steps;
         }

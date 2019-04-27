@@ -75,7 +75,7 @@ public class InMemoryPlanBuilderTest {
                         Attributes.fullName));
         final Plan plan = planBuilder.build(
                 request);
-        final EnrichedQueryResult result = plan.execute(request);
+        final EnrichedQueryResult result = plan.execute(request, null);
         Object[] firstRow = result.getResults()[0];
         Assert.assertEquals("Tenant", firstRow[1]);
         Assert.assertEquals("Tenant", firstRow[2]);
@@ -100,7 +100,7 @@ public class InMemoryPlanBuilderTest {
                         Attributes.fullName));
         final Plan plan = planBuilder.build(
                 request);
-        final EnrichedQueryResult result = plan.execute(request);
+        final EnrichedQueryResult result = plan.execute(request, null);
         Object[] firstRow = result.getResults()[0];
         Assert.assertEquals("David", firstRow[1]);
         Assert.assertEquals("Tenant", firstRow[2]);
@@ -134,7 +134,7 @@ public class InMemoryPlanBuilderTest {
                 Arrays.asList(Attributes.studentId),
                 Arrays.asList(SimpleExpression.eq(Attributes.lastName, "Smith")));
         final Plan build = planBuilder.build(request);
-        final EnrichedQueryResult result = build.execute(request);
+        final EnrichedQueryResult result = build.execute(request, null);
         Assert.assertEquals(1, result.getResults().length);
     }
 

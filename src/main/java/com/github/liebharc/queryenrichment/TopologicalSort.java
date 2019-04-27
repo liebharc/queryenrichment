@@ -20,18 +20,18 @@ public class TopologicalSort {
      * @param attributeToStep Allows to quickly find the step for an attribute.
      * @return Sorted steps
      */
-    public List<Step<?>> sort(Collection<Step<?>> source, Map<Attribute<?>, Step<?>> attributeToStep) {
-        final List<Step<?>> sorted = new ArrayList<>();
+    public<TParameter> List<ExecutableStep<?, TParameter>> sort(Collection<ExecutableStep<?, TParameter>> source, Map<Attribute<?>, ExecutableStep<?, TParameter>> attributeToStep) {
+        final List<ExecutableStep<?, TParameter>> sorted = new ArrayList<>();
         final Set<Attribute<?>> visitedSet = new HashSet<>();
 
-        for (Step<?> item : source) {
+        for (ExecutableStep<?, TParameter> item : source) {
             this.visit(item, visitedSet, sorted, attributeToStep);
         }
 
         return sorted;
     }
 
-    private void visit(Step<?> item, Set<Attribute<?>> visited, List<Step<?>> sorted, Map<Attribute<?>, Step<?>> attributeToSelector) {
+    private<TParameter> void visit(ExecutableStep<?, TParameter> item, Set<Attribute<?>> visited, List<ExecutableStep<?, TParameter>> sorted, Map<Attribute<?>, ExecutableStep<?, TParameter>> attributeToSelector) {
         if (visited.contains(item.getAttribute())) {
             if (!sorted.contains(item)) {
                 throw new IllegalArgumentException("Cyclic dependency found, stopped at " + item);
@@ -42,7 +42,7 @@ public class TopologicalSort {
 
             Dependency dependencies = item.getDependencies();
             for (Attribute<?> dependency : dependencies.getMinimalRequiredAttributes(visited)) {
-                Step<?> stepDependency = attributeToSelector.get(dependency);
+                ExecutableStep<?, TParameter> stepDependency = attributeToSelector.get(dependency);
                 if (stepDependency == null) {
                     throw new IllegalArgumentException("Unresolved dependency found. " + item + " requires " + dependency);
                 }

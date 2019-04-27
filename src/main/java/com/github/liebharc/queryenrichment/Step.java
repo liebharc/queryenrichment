@@ -1,14 +1,13 @@
 package com.github.liebharc.queryenrichment;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Optional;
 
 /**
- * A step which is executed to get the result for a query.
- * @param <T>
+ * Definition of the meta data about a step which is executed to get the result for a query.
+ * @param <TAttribute> Attribute type
  */
-public interface Step<T> extends Serializable {
+public interface Step<TAttribute> extends Serializable {
 
     /** Constant which can be passed if a step has no direct relation to a column/property */
     String NO_COLUMN = null;
@@ -17,14 +16,7 @@ public interface Step<T> extends Serializable {
     Optional<String> getColumn();
 
     /** Returns the attribute which is set during this step */
-    Attribute<T> getAttribute();
-
-    /**
-     * This main method of a step. Works with the result object to get the values from dependencies and sets the
-     * value of this step.
-     * @param result Gives access to the results of other steps and allows this step to store its results.
-     */
-    void enrich(IntermediateResult result);
+    Attribute<TAttribute> getAttribute();
 
     /**
      * Gets the dependencies of this step.

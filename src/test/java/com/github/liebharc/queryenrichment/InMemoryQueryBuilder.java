@@ -10,7 +10,7 @@ public class InMemoryQueryBuilder implements QueryBuilder {
     public static final Step<Long> studentId = new SelectorBuilder<>(Attributes.studentId).addColumn("ID").build();
     public static final Step<String> firstName = new SelectorBuilder<>(Attributes.firstName).addColumn("FIRST_NAME").build();
     public static final Step<String> lastName = new SelectorBuilder<>(Attributes.lastName).addColumn("LAST_NAME").build();
-    public static final Step<String> fullName = new Enrichment<String>(Attributes.fullName, Dependencies.requireOneOf(Attributes.firstName, Attributes.lastName)) {
+    public static final Step<String> fullName = new ParameterlessEnrichment<String>(Attributes.fullName, Dependencies.requireOneOf(Attributes.firstName, Attributes.lastName)) {
         @Override
         public void enrich(IntermediateResult result) {
             final String firstName = result.get(Attributes.firstName);
@@ -31,7 +31,7 @@ public class InMemoryQueryBuilder implements QueryBuilder {
     }
 
     @Override
-    public com.github.liebharc.queryenrichment.Query build(List<Step<?>> steps, List<QueryFilter> filters) {
+    public com.github.liebharc.queryenrichment.Query build(List<? extends Step<?>> steps, List<QueryFilter> filters) {
         if (!filters.isEmpty()) {
             throw new IllegalArgumentException("This class doesn't support criteria");
         }
@@ -61,9 +61,9 @@ public class InMemoryQueryBuilder implements QueryBuilder {
 
     public class Query implements com.github.liebharc.queryenrichment.Query {
 
-        private final List<Step<?>> steps;
+        private final List<? extends Step<?>> steps;
 
-        public Query(List<Step<?>> steps) {
+        public Query(List<? extends Step<?>> steps) {
             this.steps = steps;
         }
 
