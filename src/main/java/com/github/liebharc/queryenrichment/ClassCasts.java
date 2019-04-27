@@ -107,7 +107,7 @@ public class ClassCasts {
         return castObject(Boolean.class, value);
     }
 
-    private static Object castObject(Class<?> clazz, Object value) {
+    public static Object castObject(Class<?> clazz, Object value) {
         return clazz.cast(value);
     }
 }

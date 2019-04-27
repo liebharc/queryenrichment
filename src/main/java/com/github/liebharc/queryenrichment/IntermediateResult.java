@@ -68,7 +68,7 @@ public class IntermediateResult {
     }
 
     /**
-     * Adds the result of a query.
+     * Adds the result of a query. Java auto conversions will be performed.
      */
     public void addFromQuery(Step<?> step) {
         Attribute<?> attribute = step.getAttribute();
@@ -77,7 +77,9 @@ public class IntermediateResult {
     }
 
     /**
-     * Adds the result of a query assuming a certain data type. This is slightly faster than {@link #addFromQuery(Step)}.
+     * Adds the result of a query assuming a certain data type.
+     * Java auto conversions will be performed.
+     * This is slightly faster than {@link #addFromQuery(Step)}.
      */
     public void addLongFromQuery(Step<Long> step) {
         Attribute<Long> attribute = step.getAttribute();
@@ -86,7 +88,9 @@ public class IntermediateResult {
     }
 
     /**
-     * Adds the result of a query assuming a certain data type. This is slightly faster than {@link #addFromQuery(Step)}.
+     * Adds the result of a query assuming a certain data type.
+     * Java auto conversions will be performed.
+     * This is slightly faster than {@link #addFromQuery(Step)}.
      */
     public void addIntegerFromQuery(Step<Integer> step) {
         Attribute<Integer> attribute = step.getAttribute();
@@ -95,7 +99,9 @@ public class IntermediateResult {
     }
 
     /**
-     * Adds the result of a query assuming a certain data type. This is slightly faster than {@link #addFromQuery(Step)}.
+     * Adds the result of a query assuming a certain data type.
+     * Java auto conversions will be performed.
+     * This is slightly faster than {@link #addFromQuery(Step)}.
      */
     public void addShortFromQuery(Step<Short> step) {
         Attribute<Short> attribute = step.getAttribute();
@@ -104,7 +110,9 @@ public class IntermediateResult {
     }
 
     /**
-     * Adds the result of a query assuming a certain data type. This is slightly faster than {@link #addFromQuery(Step)}.
+     * Adds the result of a query assuming a certain data type.
+     * Java auto conversions will be performed.
+     * This is slightly faster than {@link #addFromQuery(Step)}.
      */
     public void addBooleanFromQuery(Step<Boolean> step) {
         Attribute<Boolean> attribute = step.getAttribute();
@@ -113,7 +121,9 @@ public class IntermediateResult {
     }
 
     /**
-     * Adds the result of a query assuming a certain data type. This is slightly faster than {@link #addFromQuery(Step)}.
+     * Adds the result of a query assuming a certain data type.
+     * Java auto conversions will be performed.
+     * This is slightly faster than {@link #addFromQuery(Step)}.
      */
     public void addFloatFromQuery(Step<Float> step) {
         Attribute<Float> attribute = step.getAttribute();
@@ -122,11 +132,22 @@ public class IntermediateResult {
     }
 
     /**
-     * Adds the result of a query assuming a certain data type. This is slightly faster than {@link #addFromQuery(Step)}.
+     * Adds the result of a query assuming a certain data type.
+     * Java auto conversions will be performed.
+     * This is slightly faster than {@link #addFromQuery(Step)}.
      */
     public void addDoubleFromQuery(Step<Double> step) {
         Attribute<Double> attribute = step.getAttribute();
         results.put(attribute, ClassCasts.castDouble(queryResult.get(queryResultPos)));
+        this.nextColumn();
+    }
+
+    /**
+     * Adds the result of a query skipping all Java auto conversions.
+     */
+    public void addObjectFromQuery(Step<?> step) {
+        Attribute<?> attribute = step.getAttribute();
+        results.put(attribute, ClassCasts.castObject(step.getAttribute().getAttributeClass(), queryResult.get(queryResultPos)));
         this.nextColumn();
     }
 
