@@ -22,7 +22,7 @@ public class TopologicalSort {
     }
 
     private void visit(Step<?> item, Set<Attribute<?>> visited, List<Step<?>> sorted, Map<Attribute<?>, Step<?>> attributeToSelector) {
-        if (visited.contains(item)) {
+        if (visited.contains(item.getAttribute())) {
             if (!sorted.contains(item)) {
                 throw new IllegalArgumentException("Cyclic dependency found, stopped at " + item);
             }
