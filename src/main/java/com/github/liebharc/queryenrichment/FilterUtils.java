@@ -4,10 +4,10 @@ import java.util.List;
 
 public class FilterUtils {
 
-    public static String getSqlCriteria(List<SimpleExpression> criteria) {
+    public static String getSqlCriteria(List<DatabaseFilter> criteria) {
         final StringBuilder result = new StringBuilder();
         boolean isFirst = true;
-        for (SimpleExpression criterion : criteria) {
+        for (DatabaseFilter criterion : criteria) {
 
             if (!isFirst) {
                 result.append(" and ");

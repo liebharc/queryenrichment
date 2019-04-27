@@ -31,18 +31,13 @@ public abstract class PlanBuilder {
             throw new IllegalArgumentException("At least one attribute must be requested");
         }
 
-        if (this.hasMultipleDomains(request.getAttributes())) {
-            throw new IllegalArgumentException("Can't query for multiple domain in one request");
-        }
-
         final String domain = request.getAttributes().get(0).getDomain();
 
         final Map<Boolean, List<SimpleExpression>> groupedByQueryFilter = this.groupByQueryFilter(request.getCriteria());
         final List<Step<?>> filterSteps =
                 this.addDependencies(
                         this.createFilterSteps(
-                            domain,
-                            groupedByQueryFilter.getOrDefault(false, Collections.emptyList())));
+                                groupedByQueryFilter.getOrDefault(false, Collections.emptyList())));
         List<SimpleExpression> sqlQueryExpressions = groupedByQueryFilter.getOrDefault(true, Collections.emptyList());
         final List<Step<?>> allRequiredSteps =
                 this.addStepsForFilters(filterSteps,
@@ -50,9 +45,8 @@ public abstract class PlanBuilder {
                         this.addDependencies(
                             this.findRequiredSelectors(sqlQueryExpressions, request))));
         final List<Step<?>> orderedSteps = this.orderSelectorsByDependencies(allRequiredSteps);
-        final List<SimpleExpression> filters =
+        final List<DatabaseFilter> filters =
                 this.translatePropertyNames(
-                        domain,
                         groupedByQueryFilter.getOrDefault(true, Collections.emptyList()));
         final List<Step<?>> queryColumns =
                 orderedSteps.stream()
@@ -77,10 +71,9 @@ public abstract class PlanBuilder {
         return result;
     }
 
-    private List<Step<?>> createFilterSteps(String domain, List<SimpleExpression> javaFilters) {
+    private List<Step<?>> createFilterSteps(List<SimpleExpression> javaFilters) {
         return javaFilters.stream().map(expr -> {
-            final Attribute<Object> attribute = new Attribute<>(Object.class, domain, expr.getPropertyName());
-            final Step<?> step = attributeToSelector.get(attribute);
+            final Step<?> step = attributeToSelector.get(expr.getAttribute());
             if (step == null) {
                 throw new IllegalArgumentException("Failed to find selector for expression " + expr);
             }
@@ -113,22 +106,17 @@ public abstract class PlanBuilder {
         return result;
     }
 
-    private boolean hasMultipleDomains(List<Attribute<?>> attributes) {
-        final String domain = attributes.get(0).getDomain();
-        return attributes.stream().anyMatch(attr -> !attr.getDomain().equals(domain));
-    }
-
     private List<Step<?>> injectConstants(List<SimpleExpression> queryFilters, List<Step<?>> steps) {
-        Map<String, SimpleExpression> equalityFilters = queryFilters.stream()
+        Map<Attribute<?>, SimpleExpression> equalityFilters = queryFilters.stream()
                 .filter(this::isEqualityExpression)
-                .collect(Collectors.toMap(SimpleExpression::getPropertyName, expr -> expr));
+                .collect(Collectors.toMap(SimpleExpression::getAttribute, expr -> expr));
 
         return steps.stream().map(step -> {
             if (step.isConstant()) {
                 return step;
             }
 
-            SimpleExpression filterExpression = equalityFilters.get(step.getAttribute().getProperty());
+            SimpleExpression filterExpression = equalityFilters.get(step.getAttribute());
             if (filterExpression != null) {
                 return new AddValuesFromFilter<>(step.getAttribute(), filterExpression);
             }
@@ -139,12 +127,12 @@ public abstract class PlanBuilder {
     }
 
     private List<Step<?>> findRequiredSelectors(List<SimpleExpression> queryExpressions, Request request) {
-        Map<String, SimpleExpression> equalityFilters = queryExpressions.stream()
+        Map<Attribute<?>, SimpleExpression> equalityFilters = queryExpressions.stream()
                 .filter(this::isEqualityExpression)
-                .collect(Collectors.toMap(SimpleExpression::getPropertyName, expr -> expr));
+                .collect(Collectors.toMap(SimpleExpression::getAttribute, expr -> expr));
 
         return request.getAttributes().stream().map(attr -> {
-            SimpleExpression filterExpression = equalityFilters.get(attr.getProperty());
+            SimpleExpression filterExpression = equalityFilters.get(attr);
             if (filterExpression != null) {
                 return new AddValuesFromFilter<>(attr, filterExpression);
             }
@@ -195,11 +183,10 @@ public abstract class PlanBuilder {
         return TopologicalSort.INSTANCE.sort(steps, attributeToSelectorsWithConstants);
     }
 
-    private List<SimpleExpression> translatePropertyNames(String domain, List<SimpleExpression> criteria) {
+    private List<DatabaseFilter> translatePropertyNames(List<SimpleExpression> criteria) {
         return criteria.stream().map(expr -> {
-            final Attribute<?> attribute = new Attribute<>(expr.getValue().getClass(), domain, expr.getPropertyName());
-            final Optional<String> selector = Optional.ofNullable(attributeToSelector.get(attribute)).flatMap(Step::getColumn);
-            return selector.map(s -> new SimpleExpression(s, expr.getOperation(), expr.getValue())).orElse(expr);
+            final Optional<String> selector = Optional.ofNullable(attributeToSelector.get(expr.getAttribute())).flatMap(Step::getColumn);
+            return selector.map(s -> new DatabaseFilter(expr, s)).orElse(new DatabaseFilter(expr));
         }).collect(Collectors.toList());
     }
 

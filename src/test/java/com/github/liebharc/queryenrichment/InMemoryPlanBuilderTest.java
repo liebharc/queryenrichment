@@ -24,14 +24,15 @@ public class InMemoryPlanBuilderTest {
         new InMemoryPlanBuilder(steps);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void multipleDomainsTest() {
         final List<Step<?>> steps =
                 Arrays.asList(
                         InMemoryQueryBuilder.studentId,
                         new SelectorBuilder<>(Attributes.teacherId).addColumn("ID").build());
-        InMemoryPlanBuilder planBuilder = new InMemoryPlanBuilder(steps);
-        planBuilder.build(new Request(steps.stream().map(Step::getAttribute).collect(Collectors.toList())));
+        final InMemoryPlanBuilder planBuilder = new InMemoryPlanBuilder(steps);
+        final Plan plan = planBuilder.build(new Request(steps.stream().map(Step::getAttribute).collect(Collectors.toList())));
+        Assert.assertNotNull(plan);
     }
 
     @Test
@@ -131,7 +132,7 @@ public class InMemoryPlanBuilderTest {
         final PlanBuilder planBuilder = new InMemoryPlanBuilder(steps);
         final Request request = new Request(
                 Arrays.asList(Attributes.studentId),
-                Arrays.asList(SimpleExpression.eq(Attributes.lastName.getProperty(), "Smith")));
+                Arrays.asList(SimpleExpression.eq(Attributes.lastName, "Smith")));
         final Plan build = planBuilder.build(request);
         final EnrichedQueryResult result = build.execute(request);
         Assert.assertEquals(1, result.getResults().length);

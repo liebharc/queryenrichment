@@ -72,7 +72,7 @@ public class LoadIndicationTest {
         for (int i = 0; i < ITERATIONS; i++) {
             final Request request =
                     new Request(Arrays.asList(Attributes.studentId, Attributes.lastName, Attributes.studentClass),
-                            Arrays.asList(SimpleExpression.eq(Attributes.studentClass.getProperty(), 1)));
+                            Arrays.asList(SimpleExpression.eq(Attributes.studentClass, 1L)));
             Plan plan = planCache.getOrBuildPlan(request);
             EnrichedQueryResult result = plan.execute(request);
             Assert.assertEquals(RESULT_SIZE, result.getResults().length);

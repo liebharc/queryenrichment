@@ -58,7 +58,7 @@ public class H2PlanBuilderTest {
         final List<Step<?>> steps = this.createDefaultSelectors();
         final PlanBuilder planBuilder = new H2PlanBuilder(connection, steps);
 
-        final SimpleExpression criterion = SimpleExpression.neq("id", 11);
+        final SimpleExpression criterion = SimpleExpression.neq(Attributes.studentId, 11L);
         final Request request = new Request(
                 Arrays.asList(Attributes.studentId,
                         Attributes.lastName,
@@ -76,7 +76,7 @@ public class H2PlanBuilderTest {
         final List<Step<?>> steps = this.createDefaultSelectors();
         final PlanBuilder planBuilder = new H2PlanBuilder(connection, steps);
 
-        final SimpleExpression criterion = SimpleExpression.eq("firstName", "David");
+        final SimpleExpression criterion = SimpleExpression.eq(Attributes.firstName, "David");
         final Request request = new Request(
                 Arrays.asList(Attributes.studentId,
                         Attributes.lastName,
@@ -95,7 +95,7 @@ public class H2PlanBuilderTest {
         final List<Step<?>> steps = this.createDefaultSelectors();
         final PlanBuilder planBuilder = new H2PlanBuilder(connection, steps);
 
-        final SimpleExpression criterion = SimpleExpression.eq("firstName", "David");
+        final SimpleExpression criterion = SimpleExpression.eq(Attributes.firstName, "David");
         final Request request = new Request(
                 Arrays.asList(Attributes.studentId,
                         Attributes.lastName,
@@ -144,7 +144,7 @@ public class H2PlanBuilderTest {
         H2QueryBuilder.classIdStringCalls = 0;
         final List<Step<?>> steps = this.createDefaultSelectors();
         final PlanBuilder planBuilder = new H2PlanBuilder(connection, steps);
-        final Request request = new Request(Arrays.asList(Attributes.classIdString), Arrays.asList(SimpleExpression.eq("class", 1)));
+        final Request request = new Request(Arrays.asList(Attributes.classIdString), Arrays.asList(SimpleExpression.eq(Attributes.studentClass, 1L)));
         final Plan plan = planBuilder.build(request);
         final EnrichedQueryResult result = plan.execute(request);
         Assert.assertEquals(

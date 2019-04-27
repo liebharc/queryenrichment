@@ -35,7 +35,7 @@ public class H2QueryBuilder implements QueryBuilder {
     }
 
     @Override
-    public com.github.liebharc.queryenrichment.Query build(List<Step<?>> steps, String domain, List<SimpleExpression> filters) {
+    public com.github.liebharc.queryenrichment.Query build(List<Step<?>> steps, String domain, List<DatabaseFilter> filters) {
         final String select = this.createSelectStatement(steps);
         final StringBuilder query = new StringBuilder();
         query.append("SELECT ");
