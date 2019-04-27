@@ -44,4 +44,13 @@ public abstract class Enrichment<T> implements Step<T> {
     public boolean isConstant() {
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "Enrichment{" +
+                "attribute=" + attribute +
+                ", column='" + column + '\'' +
+                ", dependency=" + dependency +
+                '}';
+    }
 }
