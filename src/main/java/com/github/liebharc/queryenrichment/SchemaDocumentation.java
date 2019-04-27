@@ -6,12 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * A helper to draw a simple documentation for the attribute schema
+ */
 public class SchemaDocumentation {
 
+    /** Singleton */
     public static final SchemaDocumentation INSTANCE = new SchemaDocumentation();
 
     private SchemaDocumentation() {
-
+        // Singleton class
     }
 
     public String drawSchema(Collection<Attribute<?>> attributes) {

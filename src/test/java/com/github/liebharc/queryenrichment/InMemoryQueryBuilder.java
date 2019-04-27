@@ -1,6 +1,5 @@
 package com.github.liebharc.queryenrichment;
 
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,7 +31,7 @@ public class InMemoryQueryBuilder implements QueryBuilder {
     }
 
     @Override
-    public com.github.liebharc.queryenrichment.Query build(List<Step<?>> steps, String domain, List<DatabaseFilter> filters) {
+    public com.github.liebharc.queryenrichment.Query build(List<Step<?>> steps, List<QueryFilter> filters) {
         if (!filters.isEmpty()) {
             throw new IllegalArgumentException("This class doesn't support criteria");
         }

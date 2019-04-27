@@ -3,14 +3,20 @@ package com.github.liebharc.queryenrichment;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Creates a plan for a query. This class is intended to be subclassed so that implementors can provide their
+ * query builder.
+ */
 public abstract class PlanBuilder {
-    private final Map<Attribute<?>, Step<?>> attributeToSelector = new HashMap<>();
+    /** Maps attributes to the step which creates that attribute */
+    private final Map<Attribute<?>, Step<?>> attributeToStep = new HashMap<>();
 
     public PlanBuilder(List<Step<?>> steps) {
-        final StringBuilder errorBuilder = new StringBuilder(0);
 
+        // Create lookup tables and check steps
+        final StringBuilder errorBuilder = new StringBuilder(0);
         for (Step<?> step : steps) {
-            Step<?> previousMapping= this.attributeToSelector.put(step.getAttribute(), step);
+            Step<?> previousMapping= this.attributeToStep.put(step.getAttribute(), step);
 
             if (previousMapping != null) {
                 errorBuilder.append(step.getAttribute())
@@ -26,12 +32,13 @@ public abstract class PlanBuilder {
         }
     }
 
+    /**
+     * Builds the plan for a request.
+     */
     public Plan build(Request request) {
         if (request.getAttributes().isEmpty()) {
             throw new IllegalArgumentException("At least one attribute must be requested");
         }
-
-        final String domain = request.getAttributes().get(0).getDomain();
 
         final Map<Boolean, List<SimpleExpression>> groupedByQueryFilter = this.groupByQueryFilter(request.getCriteria());
         final List<Step<?>> filterSteps =
@@ -43,9 +50,9 @@ public abstract class PlanBuilder {
                 this.addStepsForFilters(filterSteps,
                     this.injectConstants(sqlQueryExpressions,
                         this.addDependencies(
-                            this.findRequiredSelectors(sqlQueryExpressions, request))));
+                            this.findRequiredSteps(sqlQueryExpressions, request))));
         final List<Step<?>> orderedSteps = this.orderSelectorsByDependencies(allRequiredSteps);
-        final List<DatabaseFilter> filters =
+        final List<QueryFilter> filters =
                 this.translatePropertyNames(
                         groupedByQueryFilter.getOrDefault(true, Collections.emptyList()));
         final List<Step<?>> queryColumns =
@@ -56,9 +63,12 @@ public abstract class PlanBuilder {
                 request.getAttributes(),
                 groupedByConstant.get(true),
                 groupedByConstant.get(false),
-                this.getQueryBuilder().build(queryColumns, domain, filters));
+                this.getQueryBuilder().build(queryColumns, filters));
     }
 
+    /**
+     * Joins the lists of selector/enrichment and filter steps.
+     */
     private List<Step<?>> addStepsForFilters(List<Step<?>> filterSteps, List<Step<?>> requiredSelectors) {
         final List<Step<?>> result = new ArrayList<>(filterSteps.size() + requiredSelectors.size());
         result.addAll(filterSteps);
@@ -71,17 +81,23 @@ public abstract class PlanBuilder {
         return result;
     }
 
+    /**
+     * Creates Java filters for the given filter expressions.
+     */
     private List<Step<?>> createFilterSteps(List<SimpleExpression> javaFilters) {
         return javaFilters.stream().map(expr -> {
-            final Step<?> step = attributeToSelector.get(expr.getAttribute());
+            final Step<?> step = attributeToStep.get(expr.getAttribute());
             if (step == null) {
                 throw new IllegalArgumentException("Failed to find selector for expression " + expr);
             }
 
-            return Filter.createFilter(step, expr);
+            return FilterStep.createFilter(step, expr);
         }).collect(Collectors.toList());
     }
 
+    /**
+     * Groups the given list of steps in constant/not-constant.
+     */
     private Map<Boolean, List<Step<?>>> groupByConstant(List<Step<?>> steps) {
         final List<Step<?>> constant = new ArrayList<>();
         final Set<Attribute<?>> constantAttributes = new HashSet<>();
@@ -106,6 +122,9 @@ public abstract class PlanBuilder {
         return result;
     }
 
+    /**
+     * Replaces steps by constants where possible.
+     */
     private List<Step<?>> injectConstants(List<SimpleExpression> queryFilters, List<Step<?>> steps) {
         Map<Attribute<?>, SimpleExpression> equalityFilters = queryFilters.stream()
                 .filter(this::isEqualityExpression)
@@ -126,7 +145,10 @@ public abstract class PlanBuilder {
         }).collect(Collectors.toList());
     }
 
-    private List<Step<?>> findRequiredSelectors(List<SimpleExpression> queryExpressions, Request request) {
+    /**
+     * Find the required steps to implement the given list of filters in Java.
+     */
+    private List<Step<?>> findRequiredSteps(List<SimpleExpression> queryExpressions, Request request) {
         Map<Attribute<?>, SimpleExpression> equalityFilters = queryExpressions.stream()
                 .filter(this::isEqualityExpression)
                 .collect(Collectors.toMap(SimpleExpression::getAttribute, expr -> expr));
@@ -137,12 +159,14 @@ public abstract class PlanBuilder {
                 return new AddValuesFromFilter<>(attr, filterExpression);
             }
             else {
-                return attributeToSelector.get(attr);
+                return attributeToStep.get(attr);
             }
         }).collect(Collectors.toList());
     }
 
-
+    /**
+     * Adds the dependencies for all steps.
+     */
     private List<Step<?>> addDependencies(List<Step<?>> requiredSteps) {
         final List<Step<?>> result = new ArrayList<>();
         final Set<Attribute<?>> availableAttributes =
@@ -154,6 +178,9 @@ public abstract class PlanBuilder {
         return result;
     }
 
+    /**
+     * Adds the dependencies for a step.
+     */
     private void addDependency(List<Step<?>> result, Step<?> item, Set<Attribute<?>> availableAttributes) {
         if (result.contains(item)) {
             return;
@@ -163,7 +190,7 @@ public abstract class PlanBuilder {
         availableAttributes.add(item.getAttribute());
 
         for (Attribute<?> dependency : item.getDependencies().getMinimalRequiredAttributes(availableAttributes)) {
-            final Step<?> step = attributeToSelector.get(dependency);
+            final Step<?> step = attributeToStep.get(dependency);
             if (step == null) {
                 throw new IllegalArgumentException("Inconsistent selector tree, a selector contains an dependency which doesn't exist: " + item + " requires " + dependency);
             }
@@ -172,8 +199,11 @@ public abstract class PlanBuilder {
         }
     }
 
+    /**
+     * Creates a linear execution plan for given list of steps.
+     */
     private List<Step<?>> orderSelectorsByDependencies(List<Step<?>> steps) {
-        final Map<Attribute<?>, Step<?>> attributeToSelectorsWithConstants = new HashMap<>(attributeToSelector);
+        final Map<Attribute<?>, Step<?>> attributeToSelectorsWithConstants = new HashMap<>(attributeToStep);
         for (Step<?> step : steps) {
             if (step.isConstant()) {
                 attributeToSelectorsWithConstants.put(step.getAttribute(), step);
@@ -183,19 +213,22 @@ public abstract class PlanBuilder {
         return TopologicalSort.INSTANCE.sort(steps, attributeToSelectorsWithConstants);
     }
 
-    private List<DatabaseFilter> translatePropertyNames(List<SimpleExpression> criteria) {
+    /**
+     * Adds the column names to a filter expression.
+     */
+    private List<QueryFilter> translatePropertyNames(List<SimpleExpression> criteria) {
         return criteria.stream().map(expr -> {
-            final Optional<String> selector = Optional.ofNullable(attributeToSelector.get(expr.getAttribute())).flatMap(Step::getColumn);
-            return selector.map(s -> new DatabaseFilter(expr, s)).orElse(new DatabaseFilter(expr));
+            final Optional<String> selector = Optional.ofNullable(attributeToStep.get(expr.getAttribute())).flatMap(Step::getColumn);
+            return selector.map(s -> new QueryFilter(expr, s)).orElse(new QueryFilter(expr));
         }).collect(Collectors.toList());
     }
 
+    /**
+     * Groups filters into one of two groups: Filters which can be executed together with the query and filters
+     * which must be executed in Java.
+     */
     private Map<Boolean, List<SimpleExpression>> groupByQueryFilter(List<SimpleExpression> criteria) {
         return criteria.stream().collect(Collectors.groupingBy(this::isSupportedByQuery));
-    }
-
-    protected boolean isSupportedByQuery(SimpleExpression criteria) {
-        return true;
     }
 
     /**
@@ -205,5 +238,15 @@ public abstract class PlanBuilder {
         return expr.getOperation().equals("=");
     }
 
+    /**
+     * Intended to be overwritten. Indicates whether or not an expression can be added to the query.
+     */
+    protected boolean isSupportedByQuery(SimpleExpression criteria) {
+        return true;
+    }
+
+    /**
+     * Intended to be overwritten. Provides the concrete query builder which should be used.
+     */
     protected abstract QueryBuilder getQueryBuilder();
 }

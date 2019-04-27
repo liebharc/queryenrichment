@@ -35,13 +35,13 @@ public class H2QueryBuilder implements QueryBuilder {
     }
 
     @Override
-    public com.github.liebharc.queryenrichment.Query build(List<Step<?>> steps, String domain, List<DatabaseFilter> filters) {
+    public com.github.liebharc.queryenrichment.Query build(List<Step<?>> steps, List<QueryFilter> filters) {
         final String select = this.createSelectStatement(steps);
         final StringBuilder query = new StringBuilder();
         query.append("SELECT ");
         query.append(select);
         query.append(" FROM ");
-        query.append(domain);
+        query.append("student");
 
         if (!filters.isEmpty()) {
             query.append(" WHERE ");

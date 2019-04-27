@@ -2,20 +2,30 @@ package com.github.liebharc.queryenrichment;
 
 import java.util.*;
 
+/**
+ * Implements the topological sort of steps.
+ */
 public class TopologicalSort {
 
+    /** Singleton */
     public static final TopologicalSort INSTANCE = new TopologicalSort();
 
     private TopologicalSort() {
-
+        // Singleton
     }
 
-    public List<Step<?>> sort(Collection<Step<?>> source, Map<Attribute<?>, Step<?>> attributeToSelector) {
+    /**
+     * Sorts steps according to their dependencies.
+     * @param source Steps to be sorted
+     * @param attributeToStep Allows to quickly find the step for an attribute.
+     * @return Sorted steps
+     */
+    public List<Step<?>> sort(Collection<Step<?>> source, Map<Attribute<?>, Step<?>> attributeToStep) {
         final List<Step<?>> sorted = new ArrayList<>();
         final Set<Attribute<?>> visitedSet = new HashSet<>();
 
         for (Step<?> item : source) {
-            this.visit(item, visitedSet, sorted, attributeToSelector);
+            this.visit(item, visitedSet, sorted, attributeToStep);
         }
 
         return sorted;

@@ -2,7 +2,7 @@ package com.github.liebharc.queryenrichment;
 
 import java.util.Objects;
 
-class EqualityFilter<T> extends Filter<T> {
+class EqualityFilter<T> extends FilterStep<T> {
     EqualityFilter(Step<T> innerStep, SimpleExpression expression) {
         super(innerStep, expression);
     }

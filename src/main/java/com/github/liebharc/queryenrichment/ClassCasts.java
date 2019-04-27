@@ -2,10 +2,13 @@ package com.github.liebharc.queryenrichment;
 
 import java.sql.Timestamp;
 
+/**
+ * Utility class which defines some dynamic class casts under consideration of automatic Java conversions.
+ */
 public class ClassCasts {
 
     private ClassCasts() {
-
+        // Utility class
     }
 
     /**

@@ -2,21 +2,33 @@ package com.github.liebharc.queryenrichment;
 
 import java.util.*;
 
+/**
+ * Utility class with some default dependencies.
+ */
 public class Dependencies {
+    /** Singleton for no dependency */
     private static final NoDependency noDependency = new NoDependency();
 
+    private Dependencies() {
+        // Utility class
+    }
+
+    /** A step has no dependencies */
     public static Dependency noDependencies() {
         return noDependency;
     }
 
+    /** A step requires all of the given attributes */
     public static Dependency requireAll(Attribute<?>... attributes) {
         return new RequireAll(Arrays.asList(attributes));
     }
 
+    /** A step requires a single attribute */
     public static Dependency require(Attribute<?> attribute) {
         return new RequireAll(Collections.singletonList(attribute));
     }
 
+    /** A step requires one of many attributes */
     public static Dependency requireOneOf(Attribute<?>... attributes) {
         return new RequireOneOf(Arrays.asList(attributes));
     }

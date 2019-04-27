@@ -2,10 +2,19 @@ package com.github.liebharc.queryenrichment;
 
 import java.util.Optional;
 
+/**
+ * An enrichment produces results by combining values from other attributes and/or other data sources.
+ * @param <T> Attribute type
+ */
 public abstract class Enrichment<T> implements Step<T> {
 
+    private static final long serialVersionUID = -387954492411088733L;
+
+    /** The attribute which is set by this step */
     private final Attribute<T> attribute;
+    /** Optional: Query column, most sof the time this value should be null as most enrichment don't directly query */
     private final String column;
+    /** Dependencies of this step */
     private final Dependency dependency;
 
     public Enrichment(Attribute<T> attribute, Dependency dependency) {

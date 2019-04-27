@@ -1,10 +1,17 @@
 package com.github.liebharc.queryenrichment;
 
-import java.util.Collections;
-import java.util.List;
-
+/**
+ * Consider a SQL statement like this:
+ * <pre>SELECT * FROM STUDENT WHERE CLASS = 123;</pre>
+ * If we then ask what class a student belongs to we can say from the WHERE filter condition that the class ID must be
+ * 123. This class allows to reflect that knowledge.
+ * @param <T> Attribute type
+ */
 public class AddValuesFromFilter<T> extends Enrichment<T> {
 
+    private static final long serialVersionUID = 2553654683345913539L;
+
+    /** An equality expression */
     private final SimpleExpression expression;
 
     public AddValuesFromFilter(Attribute<T> attribute, SimpleExpression expression) {

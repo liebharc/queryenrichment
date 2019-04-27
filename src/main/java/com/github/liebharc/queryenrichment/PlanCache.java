@@ -6,8 +6,15 @@ import com.google.common.cache.LoadingCache;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+/**
+ * Allows for caching of plan. If caching is used then with each query the cache will be checked if there is already
+ * a plan for the given query.
+ */
 public class PlanCache {
 
+    /**
+     * The internal cache.
+     */
     private final LoadingCache<Request, Plan> plans;
 
     public PlanCache(int cacheSize, PlanBuilder planBuilder) {

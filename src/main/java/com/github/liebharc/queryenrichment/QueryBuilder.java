@@ -2,13 +2,15 @@ package com.github.liebharc.queryenrichment;
 
 import java.util.List;
 
+/**
+ * A query builder prepares a {@link Query}.
+ */
 public interface QueryBuilder {
     /**
      * Builds a query.
      * @param steps Select expression
-     * @param domain Domain from where the data should be collected
-     * @param filters Filter or where expression
+     * @param filters FilterStep or where expression
      * @return Query object
      */
-    Query build(List<Step<?>> steps, String domain, List<DatabaseFilter> filters);
+    Query build(List<Step<?>> steps, List<QueryFilter> filters);
 }

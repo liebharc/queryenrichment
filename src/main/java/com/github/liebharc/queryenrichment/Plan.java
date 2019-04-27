@@ -4,11 +4,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A plan holds an execution plan which consists of a query and steps. It allows to execute the plan which results
+ * in a {@link EnrichedQueryResult}.
+ */
 public class Plan {
+    /** Ordered list of attributes which are queried */
     private final List<Attribute<?>> attributes;
+    /** Ordered list of constant steps */
     private final List<Step<?>> constants;
+    /** Ordered list of per row steps */
     private final List<Step<?>> steps;
+    /** Query for this plan */
     private final Query query;
+    /** Execution statistics */
     private final ExecutionStatistics statistics = new ExecutionStatistics();
 
     public Plan(
@@ -38,7 +47,9 @@ public class Plan {
 
             for (int i = 0; i < rows.size(); i++) {
                 intermediateResult.nextRow(rows.get(i));
-                this.processRow(results, intermediateResult);
+                if (this.processRow(intermediateResult)) {
+                    results.add(this.storeResultInObjectArray(intermediateResult));
+                }
             }
 
             return new EnrichedQueryResult(attributes, results.toArray(new Object[0][]));
@@ -48,6 +59,9 @@ public class Plan {
         }
     }
 
+    /**
+     * Executes all constants steps and then marks the result as constant.
+     */
     private boolean processConstants(IntermediateResult intermediateResult) {
         for (Step<?> step : constants) {
             step.enrich(intermediateResult);
@@ -60,14 +74,24 @@ public class Plan {
         return false;
     }
 
-    private void processRow(List<Object[]> results, IntermediateResult intermediateResult) {
+    /**
+     * Processes all per row steps. Returns false if the row should be filtered out.
+     */
+    private boolean processRow(IntermediateResult intermediateResult) {
         for (Step<?> step : steps) {
             step.enrich(intermediateResult);
             if (!intermediateResult.isContinueProcessing()) {
-                return;
+                return false;
             }
         }
 
+        return true;
+    }
+
+    /**
+     * Stores the results in an object array.
+     */
+    private Object[] storeResultInObjectArray(IntermediateResult intermediateResult) {
         int pos = 0;
         Object[] row = new Object[attributes.size()];
         for (Attribute attribute : attributes) {
@@ -75,7 +99,7 @@ public class Plan {
             pos++;
         }
 
-        results.add(row);
+        return row;
     }
 
     List<Step<?>> getSteps() {

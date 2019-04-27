@@ -4,10 +4,10 @@ import java.util.List;
 
 public class FilterUtils {
 
-    public static String getSqlCriteria(List<DatabaseFilter> criteria) {
+    public static String getSqlCriteria(List<QueryFilter> criteria) {
         final StringBuilder result = new StringBuilder();
         boolean isFirst = true;
-        for (DatabaseFilter criterion : criteria) {
+        for (QueryFilter criterion : criteria) {
 
             if (!isFirst) {
                 result.append(" and ");

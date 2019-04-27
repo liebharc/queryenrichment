@@ -1,12 +1,20 @@
 package com.github.liebharc.queryenrichment;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class Request {
+/**
+ * A query request.
+ */
+public class Request implements Serializable {
+    private static final long serialVersionUID = -3481567358246544063L;
+
+    /** Attributes which should be selected */
     private final List<Attribute<?>> attributes;
 
+    /** Filter conditions */
     private final List<SimpleExpression> criteria;
 
     public Request(List<Attribute<?>> attributes) {
