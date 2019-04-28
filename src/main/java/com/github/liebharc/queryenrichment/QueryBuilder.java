@@ -8,9 +8,9 @@ import java.util.List;
 public interface QueryBuilder {
     /**
      * Builds a query.
-     * @param steps Select expression
+     * @param selectors Select expression
      * @param filters FilterStep or where expression
      * @return Query object
      */
-    Query build(List<? extends Step<?>> steps, List<QueryFilter> filters);
+    Query build(List<QuerySelector> selectors, List<QueryFilter> filters);
 }

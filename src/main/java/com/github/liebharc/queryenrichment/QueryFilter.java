@@ -5,8 +5,7 @@ import java.io.Serializable;
 /**
  * A filter which is implemented by a {@link Query}. That is filters could also be executed during a {@link FilterStep}.
  */
-public class QueryFilter implements Serializable {
-    private static final long serialVersionUID = -4213055531489560743L;
+public class QueryFilter {
     /** A filter expression */
     private final SimpleExpression filter;
     /** The query column for the filter */
@@ -19,6 +18,14 @@ public class QueryFilter implements Serializable {
     public QueryFilter(SimpleExpression filter, String column) {
         this.filter = filter;
         this.column = column;
+    }
+
+    public SimpleExpression getFilter() {
+        return filter;
+    }
+
+    public String getColumn() {
+        return column;
     }
 
     /**

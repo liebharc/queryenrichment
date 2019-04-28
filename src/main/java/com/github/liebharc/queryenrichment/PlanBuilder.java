@@ -55,9 +55,11 @@ public abstract class PlanBuilder<TParameter> {
         final List<QueryFilter> filters =
                 this.translatePropertyNames(
                         groupedByQueryFilter.getOrDefault(true, Collections.emptyList()));
-        final List<ExecutableStep<?, TParameter>> queryColumns =
+        final List<QuerySelector> queryColumns =
                 orderedSteps.stream()
-                        .filter(sel -> sel.getColumn().isPresent()).collect(Collectors.toList());
+                        .filter(sel -> sel.getColumn().isPresent())
+                        .map(sel -> new QuerySelector(sel.getAttribute(), sel.getColumn().get()))
+                        .collect(Collectors.toList());
         final Map<Boolean, List<ExecutableStep<?, TParameter>>> groupedByConstant = this.groupByConstant(orderedSteps);
         return new Plan<>(
                 request.getAttributes(),

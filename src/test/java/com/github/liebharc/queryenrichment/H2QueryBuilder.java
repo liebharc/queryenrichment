@@ -3,7 +3,6 @@ package com.github.liebharc.queryenrichment;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class H2QueryBuilder implements QueryBuilder {
 
@@ -35,8 +34,8 @@ public class H2QueryBuilder implements QueryBuilder {
     }
 
     @Override
-    public com.github.liebharc.queryenrichment.Query build(List<? extends Step<?>> steps, List<QueryFilter> filters) {
-        final String select = this.createSelectStatement(steps);
+    public com.github.liebharc.queryenrichment.Query build(List<QuerySelector> selectors, List<QueryFilter> filters) {
+        final String select = this.createSelectStatement(selectors);
         final StringBuilder query = new StringBuilder();
         query.append("SELECT ");
         query.append(select);
@@ -49,36 +48,28 @@ public class H2QueryBuilder implements QueryBuilder {
         }
 
         try {
-            return new Query(connection.prepareStatement(query.toString()), steps);
+            return new Query(connection.prepareStatement(query.toString()), selectors);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String createSelectStatement(List<? extends Step<?>> steps) {
+    private String createSelectStatement(List<QuerySelector> steps) {
         if (steps.isEmpty()) {
             return "1";
         }
 
-        return steps.stream().flatMap(sel -> {
-            Optional<String> column = sel.getColumn();
-            if (column.isPresent()) {
-                return Stream.of(column.get());
-            } else {
-                final List<String> empty = Collections.emptyList();
-                return empty.stream();
-            }
-        }).collect(Collectors.joining(", "));
+        return steps.stream().map(QuerySelector::getColumn).collect(Collectors.joining(", "));
     }
 
     private class Query implements com.github.liebharc.queryenrichment.Query {
 
         private final PreparedStatement query;
-        private final List<? extends Step<?>> steps;
+        private final List<QuerySelector> selectors;
 
-        Query(PreparedStatement query, List<? extends Step<?>> steps) {
+        Query(PreparedStatement query, List<QuerySelector> selectors) {
             this.query = query;
-            this.steps = steps;
+            this.selectors = selectors;
         }
 
         @Override
@@ -95,7 +86,7 @@ public class H2QueryBuilder implements QueryBuilder {
                 final List<List<Object>> results = new ArrayList<>();
                 while (resultSet.next()) {
                     final List<Object> row = new ArrayList<>();
-                    for (int i = 1; i <= steps.size(); i++) {
+                    for (int i = 1; i <= selectors.size(); i++) {
                         row.add(resultSet.getObject(i));
                     }
 

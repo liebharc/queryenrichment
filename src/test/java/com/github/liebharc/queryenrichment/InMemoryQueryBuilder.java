@@ -31,12 +31,12 @@ public class InMemoryQueryBuilder implements QueryBuilder {
     }
 
     @Override
-    public com.github.liebharc.queryenrichment.Query build(List<? extends Step<?>> steps, List<QueryFilter> filters) {
+    public com.github.liebharc.queryenrichment.Query build(List<QuerySelector> selectors, List<QueryFilter> filters) {
         if (!filters.isEmpty()) {
             throw new IllegalArgumentException("This class doesn't support criteria");
         }
 
-        return new Query(steps);
+        return new Query(selectors);
     }
 
     public static class Database {
@@ -61,9 +61,9 @@ public class InMemoryQueryBuilder implements QueryBuilder {
 
     public class Query implements com.github.liebharc.queryenrichment.Query {
 
-        private final List<? extends Step<?>> steps;
+        private final List<QuerySelector> steps;
 
-        public Query(List<? extends Step<?>> steps) {
+        public Query(List<QuerySelector> steps) {
             this.steps = steps;
         }
 
